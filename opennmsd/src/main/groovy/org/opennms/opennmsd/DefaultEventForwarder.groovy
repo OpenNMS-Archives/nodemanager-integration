@@ -1,0 +1,127 @@
+/*
+ * This file is part of the OpenNMS(R) Application.
+ *
+ * OpenNMS(R) is Copyright (C) 2008 The OpenNMS Group, Inc.  All rights reserved.
+ * OpenNMS(R) is a derivative work, containing both original code, included code and modified
+ * code that was published under the GNU General Public License. Copyrights for modified
+ * and included code are below.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * For more information contact:
+ * OpenNMS Licensing       <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ */
+
+package org.opennms.opennmsd;
+
+ import java.text.DateFormat;
+ import java.text.SimpleDateFormat;
+ 
+import org.apache.log4j.Logger
+import org.opennms.opennmsd.AbstractEventForwarder
+import groovy.xml.MarkupBuilder
+
+class DefaultEventForwarder extends AbstractEventForwarder {
+
+    private static Logger m_log = Logger.getLogger(DefaultEventForwarder.class);
+    
+    private String m_host;
+    private String m_openNmsHost;
+    private int m_port;
+    private DateFormat m_dateFormat;
+    
+    public DefaultEventForwarder() {
+        m_log.debug("DefaultEventForwarder created")
+        m_host = InetAddress.getLocalHost().hostAddress;
+        
+        m_dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
+        m_dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+    }
+    
+    public String toString() {
+        return "DefaultEventForwarder"
+    }
+    
+    public String getHost() {
+        return m_host;
+    }
+    
+    public String getOpenNmsHost() {
+        return m_openNmsHost;
+    }
+    
+    public void setOpenNmsHost(String host) {
+        m_openNmsHost = host;
+    }
+    
+    protected void forwardEvents(List eventsToForward) {
+        
+        try {
+        
+        int count = eventsToForward.size();
+        m_log.debug("openNmsHost is ${m_openNmsHost} forwarding ${eventsToForward.size()} events.")
+        Socket socket = new Socket(m_openNmsHost, m_port);
+        socket.outputStream.withWriter { out ->
+        
+          m_log.debug("In closure forwarding events")
+          def xml = new MarkupBuilder(out);
+          xml.log {
+              events {
+                  for(NNMEvent e in eventsToForward) {
+                      m_log.debug("Forwarding event: ${e.name}")
+                      event {
+                          uei("uei.opennms.org/internal/discovery/${e.name}")
+                          source("opennmsd")
+                          time(m_dateFormat.format(e.timeStamp))
+                          host(m_host)
+                          'interface'(e.sourceAddress)
+                          snmphost(e.snmpHost)
+                          snmp {
+                              id(e.enterpriseId)
+                              generic(e.generic)
+                              specific(e.specific)
+                              version(e.version)
+                              community(e.community)
+                              //'time-stamp'(m_dateFormat.format(e.timeStamp))
+                          }
+                          List varBinds = e.varBinds;
+                          if (varBinds) {
+                             parms {
+                                for(NNMVarBind v in varBinds) {    
+                          	       parm {
+                          	           parmName(v.objectId)
+                          	           value(v.value)
+                          	       }                              
+                             	}
+                             }
+                          }
+                      }
+                  }
+              }
+          }
+        }  
+      } catch (Exception e) {
+          m_log.debug("Exception occurred", e)  
+      }finally {
+          m_log.debug("finished sending eventList ${eventsToForward}")
+      }
+    }
+
+}
