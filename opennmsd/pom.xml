@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <groupId>org.opennms.nodemanager</groupId>
+    <artifactId>nodemanager-integration</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opennms</groupId>
   <artifactId>opennmsd</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <description></description>
   <packaging>groovy-jar</packaging>
   <build>
@@ -11,13 +14,6 @@
         <groupId>org.codehaus.mojo.groovy</groupId>
         <artifactId>groovy-maven-plugin</artifactId>
         <extensions>true</extensions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.4</source>
-          <target>1.4</target>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -146,28 +142,4 @@ groovy.compiler.output.path=target/classes
       <version>1.5.2</version>
     </dependency>
   </dependencies>
-  <repositories>
-    <repository>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <id>opennms-repo</id>
-      <name>OpenNMS Repository</name>
-      <url>http://repo.opennms.org/maven2</url>
-    </repository>
-    <repository>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <id>opennms-snapshots</id>
-      <name>OpenNMS Repository</name>
-      <url>http://repo.opennms.org/snapshots</url>
-    </repository>
-  </repositories>
 </project>

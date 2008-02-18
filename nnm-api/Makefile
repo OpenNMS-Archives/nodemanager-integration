@@ -72,11 +72,13 @@ mvn-install:: java_cpp
 mvn-deploy:: java_cpp
 	mvn deploy
 
-clean::
-	mvn clean
+clean_cpp::
 	rm -f *_wrap* *~ .~* *.class 
 	rm -f core
 	rm -f *.o *.so
 	rm -f *.gif
+
+clean:: clean_cpp
+	mvn clean
 
 check: all
