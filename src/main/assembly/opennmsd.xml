@@ -1,7 +1,7 @@
 <assembly>
   <id>opennmsd</id>
   <formats>
-    <format>tar.Z</format>
+    <format>tar.gz</format>
   </formats>
   <includeBaseDirectory>true</includeBaseDirectory>
   <files>
