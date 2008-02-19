@@ -71,6 +71,14 @@ class DefaultEventForwarder extends AbstractEventForwarder {
         m_openNmsHost = host;
     }
     
+    public int getPort() {
+        return m_port;
+    }
+    
+    public void setPort(int port) {
+        m_port = port;
+    }
+    
     protected void forwardEvents(List eventsToForward) {
         
         try {
@@ -87,7 +95,7 @@ class DefaultEventForwarder extends AbstractEventForwarder {
                   for(NNMEvent e in eventsToForward) {
                       m_log.debug("Forwarding event: ${e.name}")
                       event {
-                          uei("uei.opennms.org/internal/discovery/${e.name}")
+                          uei("uei.opennms.org/external/nnm/${e.name}")
                           source("opennmsd")
                           time(m_dateFormat.format(e.timeStamp))
                           host(m_host)
@@ -104,7 +112,9 @@ class DefaultEventForwarder extends AbstractEventForwarder {
                           List varBinds = e.varBinds;
                           if (varBinds) {
                              parms {
-                                for(NNMVarBind v in varBinds) {    
+                                for(NNMVarBind v in varBinds) {
+                                    m_log.debug("adding varbind")
+                                    m_log.debug("varbind ${v.objectId}=${v.value}")
                           	       parm {
                           	           parmName(v.objectId)
                           	           value(v.value)
@@ -113,6 +123,7 @@ class DefaultEventForwarder extends AbstractEventForwarder {
                              }
                           }
                       }
+                      m_log.debug("finished creating event xml")
                   }
               }
           }

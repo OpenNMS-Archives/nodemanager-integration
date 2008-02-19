@@ -58,4 +58,6 @@ public interface NNMEvent {
     
     List getVarBinds();
     
+    public String getEventConfigurationKey();
+    
 }

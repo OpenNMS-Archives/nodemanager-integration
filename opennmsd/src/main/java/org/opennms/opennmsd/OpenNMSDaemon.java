@@ -40,6 +40,8 @@ public class OpenNMSDaemon extends TrapProcessingDaemon implements ProcessManage
 	
 	private Configuration m_configuration;
 	private EventForwarder m_eventForwarder;
+	private NNMEventFactory m_eventFactory;
+
 	
     public void setConfiguration(Configuration configuration) {
         m_configuration = configuration;
@@ -47,6 +49,10 @@ public class OpenNMSDaemon extends TrapProcessingDaemon implements ProcessManage
     
     public void setEventForwarder(EventForwarder eventForwarder) {
         m_eventForwarder = eventForwarder;
+    }
+    
+    public void setEventFactory(NNMEventFactory eventFactory) {
+        m_eventFactory = eventFactory;
     }
 
 	public String onInit() {
@@ -85,7 +91,14 @@ public class OpenNMSDaemon extends TrapProcessingDaemon implements ProcessManage
 
     protected void onEvent(int reason, OVsnmpSession session, OVsnmpPdu pdu) {
         
-        onEvent(new DefaultNNMEvent(pdu));
+        try {
+            onEvent(m_eventFactory.createEvent(pdu));
+        } catch (Exception e) {
+            log.debug("Exception processing pdu: "+pdu, e);
+        } finally {
+            pdu.free();
+        }
+
 
     }
 

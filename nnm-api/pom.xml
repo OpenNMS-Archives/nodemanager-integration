@@ -29,7 +29,7 @@
           </execution>
           <execution>
            <id>clean-swig-api</id>
-           <phase>clean_cpp</phase>
+           <phase>clean</phase>
            <goals>
               <goal>exec</goal>
             </goals>
@@ -56,6 +56,22 @@
              <sources>
                <source>target/generated-sources/swig</source>
              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>attach-shared-lib</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>libNNM.so</file>
+                  <type>so</type>
+                  <classifier>${os.name}-${os.arch}</classifier>
+                </artifact>
+              </artifacts>
             </configuration>
           </execution>
         </executions>

@@ -14,9 +14,6 @@ public class DefaultNNMEvent extends AbstractNNMEvent {
     public DefaultNNMEvent(OVsnmpPdu trap) {
         log.debug(OVsnmpPduUtils.toString(trap));
         
-        setCategory("NotYetImplemented");
-        setName("NotYetImplemented");
-        setSeverity("NotYetImplemented");
         setSourceAddress(trap.getAgentAddress());
         setTimeStamp(new Date(m_startTime+trap.getTime()*10));
         setCommunity(trap.getCommunity());
@@ -34,10 +31,6 @@ public class DefaultNNMEvent extends AbstractNNMEvent {
             varBind = varBind.getNextVarBind();
         }
         
-        
-        trap.free();
     }
-
- 
 
 }

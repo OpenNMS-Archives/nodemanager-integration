@@ -125,4 +125,17 @@ public class AbstractNNMEvent implements NNMEvent {
         m_varBinds = varBinds;
     }
 
+    public String getEventConfigurationKey() {
+        if (m_generic == 6) {
+            return m_enterpriseId+".0."+m_specific;
+        } else {
+            return m_enterpriseId+"."+(m_specific+1);
+        }
+    }
+    
+    public String toString() {
+        return "NNMEvent[name="+getName()+", address="+getSourceAddress()+", category="+getCategory()+", severity="+getSeverity()+", key="+getEventConfigurationKey()+"]";
+    }
+
+
 }

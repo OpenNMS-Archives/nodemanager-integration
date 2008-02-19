@@ -1,5 +1,6 @@
 package org.opennms.ovapi;
 
+import org.apache.log4j.Logger;
 import org.opennms.nnm.swig.OVsnmpPdu;
 import org.opennms.nnm.swig.OVsnmpSession;
 import org.opennms.nnm.swig.SnmpCallback;
@@ -7,19 +8,26 @@ import org.opennms.nnm.swig.fd_set;
 import org.opennms.nnm.swig.timeval;
 
 public abstract class TrapProcessingDaemon extends OVsDaemon {
+
     
-    OVsnmpSession m_trapSession;
+    private OVsnmpSession m_trapSession;
+    private SnmpCallback m_callback;
     
     protected String onInit() {
         
-        SnmpCallback trapCB = new SnmpCallback() {
+        m_callback = new SnmpCallback() {
 
             public void callback(int reason, OVsnmpSession session, OVsnmpPdu pdu) {
-                onEvent(reason, session, pdu);
+                Logger.getLogger(getClass()).debug("callback called");
+                try {
+                    onEvent(reason, session, pdu);
+                } finally {
+                    Logger.getLogger(getClass()).debug("callback returning");
+                }
             }
         };
         
-        m_trapSession = OVsnmpSession.eventOpen("opennmsd", trapCB, ".*");
+        m_trapSession = OVsnmpSession.eventOpen("opennmsd", m_callback, ".*");
 
         return "TrapProcessingDaemon has initialized successfully.";
     }

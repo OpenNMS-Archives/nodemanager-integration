@@ -9,6 +9,15 @@
     <module>nnm-api</module>
     <module>opennmsd</module>
   </modules>
+  <properties>
+    <ov.conf>/etc/opt/OV/share/conf</ov.conf>
+    <ov.home>/opt/OV</ov.home>
+    <ov.log>/var/opt/OV/share/log</ov.log>
+    <build.opennmsd.home>${ov.home}/opennmsd</build.opennmsd.home>
+    <build.opennmsd.log>${ov.log}</build.opennmsd.log>
+    <opennmsd.home>${build.opennmsd.home}</opennmsd.home>
+    <opennmsd.log>${build.opennmsd.log}</opennmsd.log>
+  </properties>
   <build>
     <plugins>
      <plugin>
@@ -17,6 +26,17 @@
         <configuration>
           <source>1.4</source>
           <target>1.4</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <inherited>false</inherited>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <finalName>opennmsd</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          <descriptors>
+            <descriptor>src/main/assembly/opennmsd.xml</descriptor>
+          </descriptors>
         </configuration>
       </plugin>
    </plugins>

@@ -2,7 +2,9 @@
 <opennmsd-configuration> 
     <opennms-host host-address="127.0.0.1" port="5817" /> 
     <filters> 
-        <filter action="accept" severity="Critical" /> 
         <filter action="discard" category="LOGONLY" /> 
+        <filter action="accept" severity="Critical" /> 
+        <filter action="accept" severity="Warning" /> 
+        <filter action="accept" severity="Normal" /> 
     </filters> 
 </opennmsd-configuration> 
