@@ -1,4 +1,4 @@
-To build
+To build:
 
 mvn install -Dbuild.jdk.home=<build time home of a 1.4 jdk>\
      [-Dbuild.jre.home=<runtime home of a 1.4 jdk] assembly:attached
