@@ -5,6 +5,11 @@
   <version>0.7-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>OpenNMS Integration for NNM</name>
+  <scm>
+    <connection>scm:svn:https://opennms.svn.sourceforge.net/svnroot/opennms/nodemanager-integration/trunk</connection>
+    <developerConnection>scm:svn:https://opennms.svn.sourceforge.net/svnroot/opennms/nodemanager-integration/trunk</developerConnection>
+    <url>http://opennms.svn.sourceforge.net/viewvc/opennms/nodemanager-integration/trunk</url>
+  </scm>
   <modules>
     <module>nnm-api</module>
     <module>opennmsd</module>
@@ -45,6 +50,15 @@
           </descriptors>
         </configuration>
       </plugin>
+     <plugin>
+       <inherited>false</inherited>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-release-plugin</artifactId>
+       <configuration>
+          <preparationGoals>clean install</preparationGoals>
+          <tagBase>https://opennms.svn.sourceforge.net/svnroot/opennms/nodemanager-integration/tags</tagBase>
+       </configuration>
+     </plugin>
    </plugins>
   </build>
   <repositories>

@@ -34,45 +34,57 @@
         <make>/usr/local/bin/gmake</make>
       </properties>
     </profile>
+    <profile>
+      <id>has-nnm-toolkit</id>
+      <activation>
+        <file>
+          <exists>/opt/OV/include/OV/OVsnmpApi.h</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+	  <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+		<id>generate-swig-api</id>
+		<phase>generate-sources</phase>
+		<goals>
+		  <goal>exec</goal>
+		</goals>
+		<configuration>
+		  <executable>${make}</executable>
+		  <arguments>
+                    <argument>OS=${os.name}</argument>
+                    <argument>JDK_HOME=${jdk.home}</argument>
+                    <argument>java_cpp</argument>
+		  </arguments>
+		</configuration>
+              </execution>
+              <execution>
+		<id>clean-swig-api</id>
+		<phase>clean</phase>
+		<goals>
+		  <goal>exec</goal>
+		</goals>
+		<configuration>
+		  <executable>${make}</executable>
+		  <arguments>
+                    <argument>OS=${os.name}</argument>
+                    <argument>JDK_HOME=${jdk.home}</argument>
+                    <argument>clean_cpp</argument>
+		  </arguments>
+		</configuration>
+              </execution>
+            </executions> 
+	  </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-swig-api</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${make}</executable>
-              <arguments>
-                <argument>OS=${os.name}</argument>
-                <argument>JDK_HOME=${jdk.home}</argument>
-                <argument>java_cpp</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-           <id>clean-swig-api</id>
-           <phase>clean</phase>
-           <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${make}</executable>
-              <arguments>
-                <argument>OS=${os.name}</argument>
-                <argument>JDK_HOME=${jdk.home}</argument>
-                <argument>clean_cpp</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions> 
-      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
