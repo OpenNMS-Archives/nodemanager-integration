@@ -9,5 +9,5 @@
 #   ovstop ovtrapd
 #   ovstart ovtrapd
 #
-opennmsd:${ov.home}/jre/jre1.4/bin/java:
-OVs_YES_START:pmd,ovtrapd:-Dlog4j.configuration=file\:${opennmsd.home}/log4j.properties,-Djava.library.path=${opennmsd.home}\:${ov.home}/lib,-jar,${opennmsd.home}/opennmsd.jar,${opennmsd.home}/opennmsd.xml,${ov.conf}/C/trapd.conf:OVs_WELL_BEHAVED::
+opennmsd:/usr/bin/sh:
+OVs_YES_START:pmd,ovtrapd:${opennmsd.home}/opennmsd.sh:OVs_WELL_BEHAVED::

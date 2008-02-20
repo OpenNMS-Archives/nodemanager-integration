@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.opennms.nodemanager</groupId>
     <artifactId>nodemanager-integration</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.7-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>opennmsd</artifactId>
@@ -52,7 +52,7 @@
           <systemProperties>
             <property>
               <name>nnm.jni.library</name>
-              <value>/export/home/brozow/svn/ovapi/libNNM.so</value>
+              <value>${user.home}/svn/nodemanager-integration/nnm-api/libNNM.so</value>
             </property>
           </systemProperties>
         </configuration>

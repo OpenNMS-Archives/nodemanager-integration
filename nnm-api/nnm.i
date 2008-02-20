@@ -18,22 +18,6 @@
 
 %}
 
-%ignore timezone;
-%ignore itimerval;
-%ignore adjtime;
-%ignore futimesat;
-%ignore getitimer;
-%ignore utimes;
-%ignore setitimer;
-%ignore settimeofday;
-%ignore gettimeofday;
-%ignore gethrtime;
-%ignore gethrvtime;
-%ignore fds_bits;
-
-%include "sys/time.h"
-%include "sys/select.h"
-
 typedef int OVsCodeType;
 
 %constant OVS_NO_CODE                 = 0;
@@ -93,33 +77,36 @@ int OVsReceive(OVsPMDCommand *);
 int OVsDone(const char *);
 int OVsSpmdSocketFd();
 
-int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
+typedef struct timeval {
+  %extend {
+    void  setTimeInMillis(long long millis) {
+      self->tv_sec = millis/1000;
+      self->tv_usec = (millis % 1000)*1000;
+    }
+    long long getTimeInMillis() {
+      return (self->tv_sec * 1000)+(self->tv_usec/1000);
+    }
+  }
+} timeval;
 
-
-%extend timeval {
-  void  setTimeInMillis(long long millis) {
-    self->tv_sec = millis/1000;
-    self->tv_usec = (millis % 1000)*1000;
-  }
-  long long getTimeInMillis() {
-    return (self->tv_sec * 1000)+(self->tv_usec/1000);
-  }
-}
-
-%extend fd_set {
-  void set(int fd) {
-    FD_SET(fd, self);
-  }
-  void clr(int fd) {
-    FD_CLR(fd, self);
-  }
-  void zero() {
+typedef struct fd_set {
+  %extend {
+    void set(int fd) {
+      FD_SET(fd, self);
+    }
+    void clr(int fd) {
+      FD_CLR(fd, self);
+    }
+    void zero() {
     FD_ZERO(self);
+    }
+    bool isSet(int fd) {
+      return FD_ISSET(fd, self);
+    }
   }
-  bool isSet(int fd) {
-    return FD_ISSET(fd, self);
-  }
-}
+} fd_set;
+
+int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
 
 %include "OV/OVsnmpErr.h"
 %include "OV/OVsnmpAsn1.h"
@@ -638,27 +625,30 @@ int OVsnmpSend(
 
 %pragma(java) jniclasscode=%{
   static {
-
+      org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(NNMJNI.class);
+      log.info("loading NNM Library");
       boolean loaded = false;
       String libname = System.getProperty("nnm.jni.library");
 
       if (libname != null) {
 	try {
 	  System.load(libname);
+	  log.info("Successfully loaded NNM library from "+libname);
 	  loaded = true;
-	} catch(UnsatisfiedLinkError e) {
-	  System.err.println("Unable to load library at "+libname+". Trying to load library 'NNM'. Reason: \n" + e);
+	} catch(Throwable e) {
+	  log.fatal("Unable to load library at "+libname+". Trying to load library 'NNM'. Reason: \n" + e, e);
+	  System.exit(14);
 	}
-      } 
-
-      if (!loaded) {
+      } else {
 	try {
 	  System.loadLibrary("NNM");
-	} catch (UnsatisfiedLinkError e) {
-	  System.err.println("Native code library failed to load. \n" + e);
-	  System.exit(1);
+	  log.info("Successfully loaded NNM library from "+System.mapLibraryName("NNM"));
+	} catch (Throwable e) {
+	  log.fatal("Native code library failed to load. \n" + e, e);
+	  System.exit(13);
 	}
       }
+
       
   }
 %}

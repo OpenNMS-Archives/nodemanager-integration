@@ -4,11 +4,18 @@
     <format>tar.gz</format>
   </formats>
   <includeBaseDirectory>true</includeBaseDirectory>
+  <baseDirectory>opennmsd</baseDirectory>
   <files>
     <file>
       <source>opennmsd.lrf</source>
       <outputDirectory>/</outputDirectory>
       <filtered>true</filtered>
+    </file>
+    <file>
+      <source>opennmsd.sh</source>
+      <outputDirectory>/</outputDirectory>
+      <filtered>true</filtered>
+      <fileMode>0755</fileMode>
     </file>
     <file>
       <source>log4j.properties</source>
@@ -27,6 +34,7 @@
         <attachmentClassifier>${os.name}-${os.arch}</attachmentClassifier>
         <outputDirectory>/</outputDirectory>
         <outputFileNameMapping>libNNM.so</outputFileNameMapping>
+        <fileMode>0755</fileMode>
       </binaries>
     </moduleSet>
     <moduleSet>

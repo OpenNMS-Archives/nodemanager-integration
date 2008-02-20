@@ -7,7 +7,21 @@ SWIGOPT    = -I$(OVINC) -I/usr/include
 SRCS       =
 TARGET     = NNM
 INTERFACE  = nnm.i
-LIBS       = -R$(OVLIB) -R/usr/local/lib -L$(OVLIB) -lovsnmp
+
+LIBDIRS    := $(OVLIB)
+ifeq ($(OS), HP-UX)
+	LIBDIRS += $(OVLIB)/hpux32
+else
+	LIBDIRS += /usr/local/lib
+endif
+
+LIBFLAGS  := $(foreach dir, $(LIBDIRS), -L$(dir))
+
+ifeq ($(OS), SunOS)
+	LIBFLAGS := $(LIBFLAGS) $(foreach dir, $(LIBDIRS), -R$(dir))
+endif
+
+LIBS       = $(LIBFLAGS) -lovsnmp
 INCLUDES   = -I$(OVINC)
 
 JSRCDIR    = target/generated-sources/swig
@@ -30,14 +44,29 @@ CXXSHARED=      ld -G
 # You need to set this variable to the java directories containing the
 # files "jni.h" and "md.h"
 # usually something like /usr/java/include and /usr/java/include/<arch-osname>.
-JAVA_INCLUDE= -I/usr/java/include -I/usr/java/include/solaris
+JAVA_INCLUDE := -I$(JDK_HOME)/include
+
+ifeq ($(OS), SunOS) 
+	JAVA_INCLUDE += -I$(JDK_HOME)/include/solaris
+endif
+
+ifeq ($(OS), HP-UX)
+	JAVA_INCLUDE += -I$(JDK_HOME)/include/hp-ux
+endif
 
 # Extra Java specific dynamic linking options
 JAVA_DLNK  = -static-libgcc
 JAVA_LIBPREFIX = lib
 JAVASO =.so
 JAVALDSHARED = $(LDSHARED)
-JAVACXXSHARED = $(CXXSHARED)
+#JAVACXXSHARED = $(CXXSHARED)
+#JAVACXXSHARED = $(CXXSHARED) -shared
+
+ifeq ($(OS), HP-UX)
+	JAVACXXSHARED = g++ -shared
+else
+	JAVACXXSHARED = g++ -Wl,-G
+endif
 JAVACFLAGS =
 
 IWRAP      = $(INTERFACE:.i=_wrap.i)

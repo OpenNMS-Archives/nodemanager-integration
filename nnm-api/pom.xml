@@ -2,12 +2,39 @@
   <parent>
     <groupId>org.opennms.nodemanager</groupId>
     <artifactId>nodemanager-integration</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.7-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>nnm-api</artifactId>
   <packaging>jar</packaging>
   <name>OpenNMS API for NNM</name>
+  <dependencies>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.13</version>
+    </dependency>
+  </dependencies>
+  <profiles>
+    <profile>
+      <id>solaris</id>
+      <activation>
+        <os><name>sunos</name></os>
+      </activation>
+      <properties>
+        <make>/usr/local/bin/make</make>
+      </properties>
+    </profile>
+    <profile>
+      <id>hp-ux</id>
+      <activation>
+        <os><name>hp-ux</name></os>
+      </activation>
+      <properties>
+        <make>/usr/local/bin/gmake</make>
+      </properties>
+    </profile>
+  </profiles>
   <build>
     <plugins>
       <plugin>
@@ -21,8 +48,10 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>make</executable>
+              <executable>${make}</executable>
               <arguments>
+                <argument>OS=${os.name}</argument>
+                <argument>JDK_HOME=${jdk.home}</argument>
                 <argument>java_cpp</argument>
               </arguments>
             </configuration>
@@ -34,8 +63,10 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>make</executable>
+              <executable>${make}</executable>
               <arguments>
+                <argument>OS=${os.name}</argument>
+                <argument>JDK_HOME=${jdk.home}</argument>
                 <argument>clean_cpp</argument>
               </arguments>
             </configuration>

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opennms.nodemanager</groupId>
   <artifactId>nodemanager-integration</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.7-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>OpenNMS Integration for NNM</name>
   <modules>
@@ -13,10 +13,16 @@
     <ov.conf>/etc/opt/OV/share/conf</ov.conf>
     <ov.home>/opt/OV</ov.home>
     <ov.log>/var/opt/OV/share/log</ov.log>
+    <build.jdk.home>${java.home}/..</build.jdk.home>
+    <build.jre.home>${build.jdk.home}</build.jre.home>
+    <build.jre.bin>${build.jre.home}/bin/java</build.jre.bin>
     <build.opennmsd.home>${ov.home}/opennmsd</build.opennmsd.home>
     <build.opennmsd.log>${ov.log}</build.opennmsd.log>
     <opennmsd.home>${build.opennmsd.home}</opennmsd.home>
     <opennmsd.log>${build.opennmsd.log}</opennmsd.log>
+    <jre.home>${build.jre.home}</jre.home>
+    <jre.bin>${build.jre.bin}</jre.bin>
+    <jdk.home>${build.jdk.home}</jdk.home>
   </properties>
   <build>
     <plugins>
@@ -32,8 +38,8 @@
         <inherited>false</inherited>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
-          <finalName>opennmsd</finalName>
-          <appendAssemblyId>false</appendAssemblyId>
+          <finalName>opennmsd-${os.name}-${os.arch}-${project.version}</finalName>
+          <appendAssemblyId>final</appendAssemblyId>
           <descriptors>
             <descriptor>src/main/assembly/opennmsd.xml</descriptor>
           </descriptors>

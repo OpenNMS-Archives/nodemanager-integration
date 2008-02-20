@@ -6,6 +6,11 @@ public class Main {
     
     private static Logger log = Logger.getLogger(Main.class);
 
+    static {
+        log.info("Loaded "+Main.class.getName());
+        try { Thread.sleep(20000); } catch (Exception e) {}
+    }
+
     /**
      * @param args
      */

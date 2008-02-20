@@ -1,0 +1,19 @@
+To build
+
+mvn install -Dbuild.jdk.home=<build time home of a 1.4 jdk>\
+     [-Dbuild.jre.home=<runtime home of a 1.4 jdk] assembly:attached
+
+build.jdk.home defaults to $JAVA_HOME as does build.jre.home but this
+may result in compile errors so best to set it.
+
+Also you can set
+
+-Dbuild.opennmsd.home to the place opennmsd will live at runtime.
+ This defaults to /opt/OV/opennmsd
+
+-Dbuild.opennmsd.log to the place you want the log file to be written
+ to.  This defaults to /var/opt/OV/share/log.  
+
+if the runtime java binary is not in ${build.jre.home}/bin/java then
+you may set its value using ${build.jre.bin}
+
