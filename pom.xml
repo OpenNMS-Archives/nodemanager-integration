@@ -11,9 +11,21 @@
     <url>http://opennms.svn.sourceforge.net/viewvc/opennms/nodemanager-integration/trunk</url>
   </scm>
   <modules>
-    <module>nnm-api</module>
     <module>opennmsd</module>
   </modules>
+  <profiles>
+    <profile>
+      <id>has-nnm-toolkit</id>
+      <activation>
+        <file>
+          <exists>/opt/OV/include/OV/OVsnmpApi.h</exists>
+        </file>
+      </activation>
+      <modules>
+	<module>nnm-api</module>
+      </modules>
+    </profile>
+  </profiles>
   <properties>
     <ov.conf>/etc/opt/OV/share/conf</ov.conf>
     <ov.home>/opt/OV</ov.home>
@@ -28,6 +40,7 @@
     <jre.home>${build.jre.home}</jre.home>
     <jre.bin>${build.jre.bin}</jre.bin>
     <jdk.home>${build.jdk.home}</jdk.home>
+    <nnm.api.version>${project.version}</nnm.api.version>
   </properties>
   <build>
     <plugins>
