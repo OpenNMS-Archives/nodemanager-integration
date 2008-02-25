@@ -61,7 +61,7 @@ public class OpenNMSDaemon extends TrapProcessingDaemon implements ProcessManage
 		
 		super.onInit();
 		
-		return "opennms initialization complete.";
+		return "Initialization complete.";
 	}
 
 	public String onStop() {

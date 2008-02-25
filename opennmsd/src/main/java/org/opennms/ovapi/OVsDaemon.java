@@ -174,7 +174,7 @@ public abstract class OVsDaemon {
     }
 
     private int initComplete(String initResponse, int success) {
-        log("OVsInitComlete("+initResponse+", \""+success+"\")");
+        log("OVsInitComlete(\""+initResponse+"\", "+success+")");
         return NNM.OVsInitComplete(success, initResponse);
     }
     

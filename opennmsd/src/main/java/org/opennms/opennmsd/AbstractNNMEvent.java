@@ -129,7 +129,7 @@ public class AbstractNNMEvent implements NNMEvent {
         if (m_generic == 6) {
             return m_enterpriseId+".0."+m_specific;
         } else {
-            return m_enterpriseId+"."+(m_specific+1);
+            return m_enterpriseId+"."+(m_generic+1);
         }
     }
     
