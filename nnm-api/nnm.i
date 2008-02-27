@@ -627,14 +627,12 @@ int OVsnmpSend(
   static {
       org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(NNMJNI.class);
       log.info("loading NNM Library");
-      boolean loaded = false;
       String libname = System.getProperty("nnm.jni.library");
 
       if (libname != null) {
 	try {
 	  System.load(libname);
 	  log.info("Successfully loaded NNM library from "+libname);
-	  loaded = true;
 	} catch(Throwable e) {
 	  log.fatal("Unable to load library at "+libname+". Trying to load library 'NNM'. Reason: \n" + e, e);
 	  System.exit(14);
