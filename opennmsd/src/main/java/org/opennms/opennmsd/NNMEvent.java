@@ -129,10 +129,14 @@ public class NNMEvent {
     }
 
     public String getEventConfigurationKey() {
-        if (m_generic == 6) {
-            return m_enterpriseId+".0."+m_specific;
+        return getEventConfigurationKey(getEnterpriseId(), getGeneric(), getSpecific());
+    }
+
+    public static String getEventConfigurationKey(String enterpriseId, int generic, int specific) {
+        if (generic == 6) {
+            return enterpriseId+".0."+specific;
         } else {
-            return m_enterpriseId+"."+(m_generic+1);
+            return enterpriseId+"."+(generic+1);
         }
     }
     
@@ -154,6 +158,8 @@ public class NNMEvent {
     public void addVarBind(String objectId, String type, String varbind) {
         addVarBind(new DefaultNNMVarBind(objectId, type, varbind));
     }
+    
+    
     
 
 
