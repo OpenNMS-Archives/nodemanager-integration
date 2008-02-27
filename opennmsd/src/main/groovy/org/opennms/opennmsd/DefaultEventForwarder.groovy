@@ -110,18 +110,20 @@ class DefaultEventForwarder extends AbstractEventForwarder {
                               //'time-stamp'(m_dateFormat.format(e.timeStamp))
                           }
                           List varBinds = e.varBinds;
-                          if (varBinds) {
-                             parms {
-                                for(NNMVarBind v in varBinds) {
-                                    m_log.debug("adding varbind")
-                                    m_log.debug("varbind ${v.objectId}=${v.value}")
-                          	       parm {
-                          	           parmName(v.objectId)
-                          	           value(v.value)
-                          	       }                              
+                          parms {
+                              for(NNMVarBind v in varBinds) {
+                                  m_log.debug("adding varbind")
+                                  m_log.debug("varbind ${v.objectId}=${v.value}")
+                          	      parm {
+                          	          parmName(v.objectId)
+                          	          value(v.value)
+                          	      }                              
                              	}
+                                parm {
+                                    parmName("nnmEventOid")
+                                    value(e.eventConfigurationKey)
+                                }
                              }
-                          }
                       }
                       m_log.debug("finished creating event xml")
                   }
