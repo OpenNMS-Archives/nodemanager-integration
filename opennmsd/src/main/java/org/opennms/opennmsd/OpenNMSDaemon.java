@@ -61,7 +61,7 @@ public class OpenNMSDaemon extends TrapProcessingDaemon implements ProcessManage
 		
 		super.onInit();
 		
-		return "opennms initialization complete.";
+		return "Initialization complete.";
 	}
 
 	public String onStop() {
@@ -92,7 +92,10 @@ public class OpenNMSDaemon extends TrapProcessingDaemon implements ProcessManage
     protected void onEvent(int reason, OVsnmpSession session, OVsnmpPdu pdu) {
         
         try {
-            onEvent(m_eventFactory.createEvent(pdu));
+            NNMEvent event = m_eventFactory.createEvent(pdu);
+            if (event != null) {
+                onEvent(event);
+            }
         } catch (Exception e) {
             log.debug("Exception processing pdu: "+pdu, e);
         } finally {

@@ -58,7 +58,7 @@
         <includeDependencies>false</includeDependencies>
         <outputDirectory>/</outputDirectory>
         <attachmentClassifier>jar-with-dependencies</attachmentClassifier>
-        <outputFileNameMapping>opennmsd.jar</outputFileNameMapping>
+        <outputFileNameMapping>opennmsd-${version}.jar</outputFileNameMapping>
       </binaries>
     </moduleSet>
   </moduleSets>
