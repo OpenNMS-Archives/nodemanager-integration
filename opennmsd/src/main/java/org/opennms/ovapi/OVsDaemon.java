@@ -124,7 +124,6 @@ public abstract class OVsDaemon {
     private boolean m_finished = false;
     
     private List m_scheduledTasks = new LinkedList();
-    private long m_selectedMillis;
 
     protected abstract String onInit();
 
@@ -204,9 +203,6 @@ public abstract class OVsDaemon {
     }
 
     public Object call() throws Exception {
-        long start = System.currentTimeMillis();
-        long end = start;
-        
     
         fd_set fdset = new fd_set();
         timeval tm = new timeval();
@@ -216,7 +212,7 @@ public abstract class OVsDaemon {
             fdset.zero();
             tm.setTimeInMillis(Integer.MAX_VALUE);
             int maxFDs = getRetryInfo(fdset, tm);
-            m_selectedMillis = tm.getTimeInMillis();
+
             long selectStart = System.currentTimeMillis();
             int fds = NNM.select(maxFDs, fdset, null, null, tm);
             long selectEnd = System.currentTimeMillis();
@@ -227,8 +223,6 @@ public abstract class OVsDaemon {
             
             processTimeouts();
         }     
-        
-        end = System.currentTimeMillis();
         
         return onStop();
     }

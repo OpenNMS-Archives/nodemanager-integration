@@ -52,7 +52,7 @@
           <systemProperties>
             <property>
               <name>nnm.jni.library</name>
-              <value>${user.home}/svn/nodemanager-integration/nnm-api/libNNM.so</value>
+              <value>${user.dir}/nnm-api/libNNM.so</value>
             </property>
           </systemProperties>
         </configuration>

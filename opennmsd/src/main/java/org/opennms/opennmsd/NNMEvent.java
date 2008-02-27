@@ -12,12 +12,10 @@ public class NNMEvent {
     private String m_sourceAddress;
     private Date m_timeStamp;
     private String m_community;
-    private String m_enterpriseId;
-    private int m_generic;
-    private int m_specific;
     private String m_snmpHost;
     private int m_version;
     private List m_varBinds;
+    private EventIdentity m_eventIdentity;
 
     protected void addVarBind(NNMVarBind varBind) {
         if (m_varBinds == null) {
@@ -79,29 +77,17 @@ public class NNMEvent {
     public void setCommunity(String community) {
         m_community = community;
     }
-
+    
     public String getEnterpriseId() {
-        return m_enterpriseId;
-    }
-
-    public void setEnterpriseId(String enterpriseId) {
-        m_enterpriseId = enterpriseId;
+        return m_eventIdentity.getEnterpriseId();
     }
 
     public int getGeneric() {
-        return m_generic;
-    }
-
-    public void setGeneric(int generic) {
-        m_generic = generic;
+        return m_eventIdentity.getGeneric();
     }
 
     public int getSpecific() {
-        return m_specific;
-    }
-
-    public void setSpecific(int specific) {
-        m_specific = specific;
+        return m_eventIdentity.getSpecific();
     }
 
     public String getSnmpHost() {
@@ -129,15 +115,7 @@ public class NNMEvent {
     }
 
     public String getEventConfigurationKey() {
-        return getEventConfigurationKey(getEnterpriseId(), getGeneric(), getSpecific());
-    }
-
-    public static String getEventConfigurationKey(String enterpriseId, int generic, int specific) {
-        if (generic == 6) {
-            return enterpriseId+".0."+specific;
-        } else {
-            return enterpriseId+"."+(generic+1);
-        }
+        return m_eventIdentity.getEventObjectId();
     }
     
     public String toString() {
@@ -157,6 +135,14 @@ public class NNMEvent {
 
     public void addVarBind(String objectId, String type, String varbind) {
         addVarBind(new DefaultNNMVarBind(objectId, type, varbind));
+    }
+
+    public void setEventIdentity(EventIdentity id) {
+        m_eventIdentity = id;
+    }
+    
+    public EventIdentity getEventIdentity() {
+        return m_eventIdentity;
     }
     
     

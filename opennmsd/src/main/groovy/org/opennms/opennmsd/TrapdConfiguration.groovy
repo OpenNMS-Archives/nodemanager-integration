@@ -49,6 +49,27 @@ class TrapdConfiguration implements EventConfiguration {
     String getSeverity(String key) {
         return m_severity.get(key)
     }
-
-
+    
+    EventDescription getDescription(EventIdentity identity, String agentAddress) {
+        EventDescription descr = new EventDescription();
+        String eventOid = identity.getEventObjectId();
+        
+        descr.setEventObjectId(eventOid);
+        descr.setName(m_names.get(eventOid));
+        descr.setCategory(m_categories.get(eventOid));
+        descr.setSeverity(m_severity.get(eventOid));
+        descr.setAddress(agentAddress);
+        
+        String nodeLabel = agentAddress;
+        try {
+            nodeLabel = InetAddress.getByName(agentAddress).hostName;
+        } catch(UnknownHostException e) {
+            log.info("Could not reverse resolve ${agentAddress} to a hostname");
+        }
+        
+        descr.setNodeLabel(nodeLabel);
+        
+        return descr;
+    }
+    
 }

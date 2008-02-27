@@ -27,31 +27,33 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
         String enterpriseId = trap.getEnterpriseObjectId();
         int generic = trap.getGenericType();
         int specific = trap.getSpecificType();
+        String agentAddress = trap.getAgentAddress();
+
+        EventIdentity eId = new EventIdentity(enterpriseId, generic, specific);
         
-        String key = NNMEvent.getEventConfigurationKey(enterpriseId, generic, specific);
-        if (m_eventConfiguration.getName(key) == null) {
-            log.info("Could not find trap with id "+key+" in trapd.conf");
+        
+        EventDescription descr = m_eventConfiguration.getDescription(eId, agentAddress);
+        
+        if (descr == null) {
+            log.info("Could not find trap with id "+eId+" in trapd.conf");
             return null;
         }
         
         
         NNMEvent e = new NNMEvent();
-        e.setSourceAddress(trap.getAgentAddress());
+
         e.setTimeStamp(new Date(DefaultNNMEventFactory.s_startTime+trap.getTime()*10));
         e.setCommunity(trap.getCommunity());
-        e.setEnterpriseId(enterpriseId);
-        e.setGeneric(generic);
-        e.setSpecific(specific);
+        e.setEventIdentity(eId);
         e.setSnmpHost(trap.getIpAddress());
         e.setVersion(1);
         
-        e.setName(m_eventConfiguration.getName(key));
-        e.setCategory(m_eventConfiguration.getCategory(key));
-        e.setSeverity(m_eventConfiguration.getSeverity(key));
+        e.setName(descr.getName());
+        e.setCategory(descr.getCategory());
+        e.setSeverity(descr.getSeverity());
 
         OVsnmpVarBind varBind = trap.getVarBinds();
         
-        String nodeLabel = null;
         while(varBind != null) {
             String objectId = varBind.getObjectId();
             String varbindValue = OVsnmpPduUtils.getVarbindValue(varBind);
@@ -63,8 +65,9 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
                 try {
                     InetAddress addr = InetAddress.getByName(varbindValue);
                     String iface = addr.getHostAddress();
-                    nodeLabel = addr.getHostName();
-                    e.setSourceAddress(iface);
+                    String nodeLabel = addr.getHostName();
+                    descr.setAddress(iface);
+                    descr.setNodeLabel(nodeLabel);
                     
                 } catch (UnknownHostException ex) {
                     // this is the normal case so do nothing
@@ -78,18 +81,9 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
             varBind = varBind.getNextVarBind();
         }
         
-        if (nodeLabel == null) {
-            // resolve the ipaddress to the hostname and store in the nodelabel
-            try {
-                nodeLabel = InetAddress.getByName(e.getSourceAddress()).getHostName();
-            } catch (UnknownHostException e1) {
-                log.info("Unable to resolve trap agent address: "+e.getSourceAddress()+" to a hostname" );
-            }
-        }
+        e.setSourceAddress(descr.getAddress());
         
-        if (nodeLabel != null) {
-            e.addVarBind("nodelabel", "OctetString", nodeLabel);
-        }
+        e.addVarBind("nodelabel", "OctetString", descr.getNodeLabel());
         
         return e;
     }
