@@ -78,6 +78,15 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
             varBind = varBind.getNextVarBind();
         }
         
+        if (nodeLabel == null) {
+            // resolve the ipaddress to the hostname and store in the nodelabel
+            try {
+                nodeLabel = InetAddress.getByName(e.getSourceAddress()).getHostName();
+            } catch (UnknownHostException e1) {
+                log.info("Unable to resolve trap agent address: "+e.getSourceAddress()+" to a hostname" );
+            }
+        }
+        
         if (nodeLabel != null) {
             e.addVarBind("nodelabel", "OctetString", nodeLabel);
         }

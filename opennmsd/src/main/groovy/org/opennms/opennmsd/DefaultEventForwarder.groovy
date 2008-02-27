@@ -81,11 +81,13 @@ class DefaultEventForwarder extends AbstractEventForwarder {
     
     protected void forwardEvents(List eventsToForward) {
         
+        Socket socket = null;
+        
         try {
         
         int count = eventsToForward.size();
         m_log.debug("openNmsHost is ${m_openNmsHost} forwarding ${eventsToForward.size()} events.")
-        Socket socket = new Socket(m_openNmsHost, m_port);
+        socket = new Socket(m_openNmsHost, m_port);
         socket.outputStream.withWriter { out ->
         
           m_log.debug("In closure forwarding events")
@@ -111,7 +113,7 @@ class DefaultEventForwarder extends AbstractEventForwarder {
                           }
                           List varBinds = e.varBinds;
                           parms {
-                              for(NNMVarBind v in varBinds) {
+                              for(NNMVarBind v in varBinds) {   
                                   m_log.debug("adding varbind")
                                   m_log.debug("varbind ${v.objectId}=${v.value}")
                           	      parm {
@@ -134,6 +136,7 @@ class DefaultEventForwarder extends AbstractEventForwarder {
           m_log.debug("Exception occurred", e)  
       }finally {
           m_log.debug("finished sending eventList ${eventsToForward}")
+          try { if (socket != null) socket.close(); } catch (IOException e) { m_log.info("Failed to close the socket to opennms.") }
       }
     }
 

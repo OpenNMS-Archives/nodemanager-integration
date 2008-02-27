@@ -6,11 +6,6 @@ public class Main {
     
     private static Logger log = Logger.getLogger(Main.class);
 
-    static {
-        log.info("Loaded "+Main.class.getName());
-        try { Thread.sleep(20000); } catch (Exception e) {}
-    }
-
     /**
      * @param args
      */
@@ -19,7 +14,7 @@ public class Main {
             
             log.info("Starting opennmsd: ${args}");
 
-            if (args.length < 1) {
+            if (args.length < 2) {
                 throw new IllegalArgumentException("Configuration files must be specified");
             }
             
