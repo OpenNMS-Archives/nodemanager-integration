@@ -1,63 +1,160 @@
-/*
- * This file is part of the OpenNMS(R) Application.
- *
- * OpenNMS(R) is Copyright (C) 2008 The OpenNMS Group, Inc.  All rights reserved.
- * OpenNMS(R) is a derivative work, containing both original code, included code and modified
- * code that was published under the GNU General Public License. Copyrights for modified
- * and included code are below.
- *
- * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- * For more information contact:
- * OpenNMS Licensing       <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
- */
 package org.opennms.opennmsd;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
-public interface NNMEvent {
+public class NNMEvent {
 
-    public String getCategory();
+    private String m_category;
+    private String m_name;
+    private String m_severity;
+    private String m_sourceAddress;
+    private Date m_timeStamp;
+    private String m_community;
+    private String m_enterpriseId;
+    private int m_generic;
+    private int m_specific;
+    private String m_snmpHost;
+    private int m_version;
+    private List m_varBinds;
 
-    public String getSeverity();
+    protected void addVarBind(NNMVarBind varBind) {
+        if (m_varBinds == null) {
+            m_varBinds = new LinkedList();
+        }
+        
+        m_varBinds.add(varBind);
+        
+    }
+    
+    protected void addVarBind() {
+        
+    }
 
-    public String getName();
+    public String getCategory() {
+        return m_category;
+    }
 
-    public String getSourceAddress();
+    public void setCategory(String category) {
+        m_category = category;
+    }
+
+    public String getName() {
+        return m_name;
+    }
+
+    public void setName(String name) {
+        m_name = name;
+    }
+
+    public String getSeverity() {
+        return m_severity;
+    }
+
+    public void setSeverity(String severity) {
+        m_severity = severity;
+    }
+
+    public String getSourceAddress() {
+        return m_sourceAddress;
+    }
+
+    public void setSourceAddress(String sourceAddress) {
+        m_sourceAddress = sourceAddress;
+    }
+
+    public Date getTimeStamp() {
+        return m_timeStamp;
+    }
+
+    public void setTimeStamp(Date timeStamp) {
+        m_timeStamp = timeStamp;
+    }
+
+    public String getCommunity() {
+        return m_community;
+    }
+
+    public void setCommunity(String community) {
+        m_community = community;
+    }
+
+    public String getEnterpriseId() {
+        return m_enterpriseId;
+    }
+
+    public void setEnterpriseId(String enterpriseId) {
+        m_enterpriseId = enterpriseId;
+    }
+
+    public int getGeneric() {
+        return m_generic;
+    }
+
+    public void setGeneric(int generic) {
+        m_generic = generic;
+    }
+
+    public int getSpecific() {
+        return m_specific;
+    }
+
+    public void setSpecific(int specific) {
+        m_specific = specific;
+    }
+
+    public String getSnmpHost() {
+        return m_snmpHost;
+    }
+
+    public void setSnmpHost(String snmpHost) {
+        m_snmpHost = snmpHost;
+    }
+
+    public int getVersion() {
+        return m_version;
+    }
+
+    public void setVersion(int version) {
+        m_version = version;
+    }
+
+    public List getVarBinds() {
+        return m_varBinds;
+    }
+
+    public void setVarBinds(List varBinds) {
+        m_varBinds = varBinds;
+    }
+
+    public String getEventConfigurationKey() {
+        if (m_generic == 6) {
+            return m_enterpriseId+".0."+m_specific;
+        } else {
+            return m_enterpriseId+"."+(m_generic+1);
+        }
+    }
     
-    public Date getTimeStamp();
+    public String toString() {
+        return "NNMEvent[name="+getName()+", address="+getSourceAddress()+", category="+getCategory()+", severity="+getSeverity()+", key="+getEventConfigurationKey()+"]";
+    }
+
+    public static NNMEvent createEvent(String category, String severity,
+            String name, String address) {
+        NNMEvent event = new NNMEvent();
+        event.setCategory(category);
+        event.setName(name);
+        event.setSourceAddress(address);
+        event.setSeverity(severity);
+        event.setTimeStamp(new Date());
+        return event;
+    }
+
+    public void addVarBind(String objectId, String type, String varbind) {
+        addVarBind(new DefaultNNMVarBind(objectId, type, varbind));
+    }
     
-    public String getSnmpHost();
-    
-    public String getEnterpriseId();
-    
-    public int getGeneric();
-    
-    public int getSpecific();
-    
-    public int getVersion();
-    
-    public String getCommunity();
-    
-    List getVarBinds();
-    
-    public String getEventConfigurationKey();
-    
+
+
 }

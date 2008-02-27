@@ -1,7 +1,5 @@
 package org.opennms.opennmsd;
 
-import org.opennms.nnm.swig.OVsnmpVarBind;
-import org.opennms.ovapi.OVsnmpPduUtils;
 
 public class DefaultNNMVarBind implements NNMVarBind {
     
@@ -10,11 +8,11 @@ public class DefaultNNMVarBind implements NNMVarBind {
     private String m_objectId;
     private String m_value;
 
-    public DefaultNNMVarBind(OVsnmpVarBind varBind) {
+    public DefaultNNMVarBind(String oid, String type, String value) {
         setEncoding("text");
-        setObjectId(varBind.getObjectId());
-        setType(OVsnmpPduUtils.getTypeString(varBind.getType()));
-        setValue(OVsnmpPduUtils.getVarbindValue(varBind));
+        setObjectId(oid);
+        setType(type);
+        setValue(value);
     }
 
     public String getEncoding() {
