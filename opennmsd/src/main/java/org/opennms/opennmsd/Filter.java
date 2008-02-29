@@ -87,14 +87,14 @@ public class Filter {
         return categoryMatches(event.getCategory())
             && severityMatches(event.getSeverity())
             && eventNameMatches(event.getName())
-            && addressMatches(event.getSourceAddress());
+            && addressMatches(event.getAgentAddress());
     }
 
-    private boolean addressMatches(String sourceAddress) {
+    private boolean addressMatches(String agentAddress) {
         if (m_addressMatchSpec == null) {
             return true;
         }
-        return IpAddressUtils.verifyIpMatch(sourceAddress, m_addressMatchSpec);
+        return IpAddressUtils.verifyIpMatch(agentAddress, m_addressMatchSpec);
     }
 
     private boolean eventNameMatches(String name) {

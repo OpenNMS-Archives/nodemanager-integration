@@ -32,6 +32,7 @@ public class Main {
             
             TrapdConfiguration trapdConf = new TrapdConfiguration();
             trapdConf.setTrapConf(new File(args[1]));
+            trapdConf.setResolver(new DefaultResolver());
             trapdConf.load();
 
             DefaultNNMEventFactory eventFactory = new DefaultNNMEventFactory();

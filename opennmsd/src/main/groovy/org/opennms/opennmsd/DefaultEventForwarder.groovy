@@ -79,7 +79,15 @@ class DefaultEventForwarder extends AbstractEventForwarder {
         m_port = port;
     }
     
+    public void setResolver(Resolver resolver) {
+        m_resolver = resolver;
+    }
+    
     protected void forwardEvents(List eventsToForward) {
+        
+        assert m_openNmsHost;
+        assert m_port;
+        assert m_resolver;
         
         Socket socket = null;
         
@@ -101,7 +109,7 @@ class DefaultEventForwarder extends AbstractEventForwarder {
                           source("opennmsd")
                           time(m_dateFormat.format(e.timeStamp))
                           host(m_host)
-                          'interface'(e.sourceAddress)
+                          'interface'(e.agentAddress)
                           snmphost(e.snmpHost)
                           snmp {
                               id(e.enterpriseId)
@@ -123,7 +131,11 @@ class DefaultEventForwarder extends AbstractEventForwarder {
                              	}
                                 parm {
                                     parmName("nnmEventOid")
-                                    value(e.eventConfigurationKey)
+                                    value(e.eventObjectId)
+                                }
+                                parm {
+                                    parmName("nodelabel")
+                                    value(e.resolveNodeLabel(r))
                                 }
                              }
                       }

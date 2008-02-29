@@ -31,63 +31,32 @@
  */
 package org.opennms.opennmsd;
 
-import org.opennms.nnm.SnmpObjId;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
+import org.apache.log4j.Logger;
 
 /**
- * EventIdentity
+ * DefaultResolver
  *
  * @author brozow
  */
-public class EventIdentity {
+public class DefaultResolver implements Resolver {
     
-    private String m_enterpriseId;
-    private int m_generic;
-    private int m_specific;
-    private SnmpObjId m_eventObjectId;
-    
-    public EventIdentity(String enterpriseId, int generic, int specific) {
-        m_enterpriseId = enterpriseId;
-        m_generic = generic;
-        m_specific = specific;
-        if (m_generic == 6) {
-            m_eventObjectId = SnmpObjId.get(m_enterpriseId+".0."+m_specific);
-        } else {
-            m_eventObjectId = SnmpObjId.get(m_enterpriseId+"."+(m_generic+1));
+    private static Logger log = Logger.getLogger(DefaultResolver.class);
+
+    /* (non-Javadoc)
+     * @see org.opennms.opennmsd.Resolver#resolve(java.lang.String)
+     */
+    public String resolveAddress(String address) {
+        String nodeLabel = address;
+        try {
+            nodeLabel = InetAddress.getByName(address).getHostName();
+        } catch(UnknownHostException e) {
+            log.info("Could not reverse resolve "+address+" to a hostname");
         }
-    }
-    
-    public String getEnterpriseId() {
-        return m_enterpriseId;
-    }
+        return nodeLabel;
 
-    public int getGeneric() {
-        return m_generic;
-    }
-
-    public int getSpecific() {
-        return m_specific;
-    }
-    
-    public SnmpObjId getEventObjectId() {
-        return m_eventObjectId;
-    }
-    
-    
-    public boolean equals(Object obj) {
-        if (obj instanceof EventIdentity) {
-            EventIdentity other = (EventIdentity)obj;
-            return getEventObjectId().equals(other.getEventObjectId());
-        }
-        return false;
-    }
-
-    public int hashCode() {
-        return getEventObjectId().hashCode();
-    }
-
-    public String toString() {
-        return getEventObjectId().toString();
     }
 
 }

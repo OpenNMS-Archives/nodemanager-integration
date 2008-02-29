@@ -1,21 +1,42 @@
 package org.opennms.opennmsd;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.opennms.nnm.SnmpObjId;
+
 public class NNMEvent {
 
-    private String m_category;
-    private String m_name;
-    private String m_severity;
-    private String m_sourceAddress;
+    // fields populated directly from the trap
+    private EventIdentity m_eventIdentity;
+    private String m_agentAddress;
     private Date m_timeStamp;
     private String m_community;
     private String m_snmpHost;
     private int m_version;
     private List m_varBinds;
-    private EventIdentity m_eventIdentity;
+
+    // fields populated from the eventFormatter (trapd.conf)
+    private String m_category;
+    private String m_name;
+    private String m_severity;
+    
+    // This fields caches the resolved agentAddress for using in forwarding
+    private String m_nodeLabel;
+    
+    public NNMEvent(String enterpriseObjectId, int genericType, int specificType) {
+        m_eventIdentity = new EventIdentity(enterpriseObjectId, genericType, specificType);
+    }
+    
+    public NNMEvent(EventIdentity identity) {
+        m_eventIdentity = identity;
+    }
+
+    public void addVarBind(String objectId, String type, String varbind) {
+        addVarBind(new DefaultNNMVarBind(objectId, type, varbind));
+    }
 
     protected void addVarBind(NNMVarBind varBind) {
         if (m_varBinds == null) {
@@ -26,10 +47,14 @@ public class NNMEvent {
         
     }
     
-    protected void addVarBind() {
-        
+    public void setEventIdentity(EventIdentity id) {
+        m_eventIdentity = id;
     }
-
+    
+    public EventIdentity getEventIdentity() {
+        return m_eventIdentity;
+    }
+    
     public String getCategory() {
         return m_category;
     }
@@ -54,12 +79,12 @@ public class NNMEvent {
         m_severity = severity;
     }
 
-    public String getSourceAddress() {
-        return m_sourceAddress;
+    public String getAgentAddress() {
+        return m_agentAddress;
     }
 
-    public void setSourceAddress(String sourceAddress) {
-        m_sourceAddress = sourceAddress;
+    public void setAgentAddress(String agentAddress) {
+        m_agentAddress = agentAddress;
     }
 
     public Date getTimeStamp() {
@@ -105,6 +130,14 @@ public class NNMEvent {
     public void setVersion(int version) {
         m_version = version;
     }
+    
+    public String getNodeLabel() {
+        return m_nodeLabel;
+    }
+
+    public void setNodeLabel(String nodeLabel) {
+        m_nodeLabel = nodeLabel;
+    }
 
     public List getVarBinds() {
         return m_varBinds;
@@ -114,39 +147,40 @@ public class NNMEvent {
         m_varBinds = varBinds;
     }
 
-    public String getEventConfigurationKey() {
+    public SnmpObjId getEventObjectId() {
         return m_eventIdentity.getEventObjectId();
     }
     
     public String toString() {
-        return "NNMEvent[name="+getName()+", address="+getSourceAddress()+", category="+getCategory()+", severity="+getSeverity()+", key="+getEventConfigurationKey()+"]";
+        return "NNMEvent[name="+getName()+", address="+getAgentAddress()+", category="+getCategory()+", severity="+getSeverity()+", oid="+getEventObjectId()+"]";
     }
 
     public static NNMEvent createEvent(String category, String severity,
             String name, String address) {
-        NNMEvent event = new NNMEvent();
+        NNMEvent event = new NNMEvent(null);
         event.setCategory(category);
         event.setName(name);
-        event.setSourceAddress(address);
+        event.setAgentAddress(address);
         event.setSeverity(severity);
         event.setTimeStamp(new Date());
         return event;
     }
 
-    public void addVarBind(String objectId, String type, String varbind) {
-        addVarBind(new DefaultNNMVarBind(objectId, type, varbind));
-    }
-
-    public void setEventIdentity(EventIdentity id) {
-        m_eventIdentity = id;
-    }
-    
-    public EventIdentity getEventIdentity() {
-        return m_eventIdentity;
+    public String resolveNodeLabel(Resolver r) {
+        if (m_nodeLabel == null) {
+            m_nodeLabel = r.resolveAddress(getAgentAddress());
+        }
+        return m_nodeLabel;
     }
     
-    
-    
-
+    public String getVarBindValue(String oid) {
+        for(Iterator it = m_varBinds.iterator(); it.hasNext(); ) {
+            NNMVarBind varBind = (NNMVarBind)it.next();
+            if (oid.equals(varBind.getObjectId())) {
+                return varBind.getValue();
+            }
+        }
+        return null;
+    }
 
 }
