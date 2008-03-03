@@ -31,11 +31,15 @@ package org.opennms.opennmsd;
 
 public interface EventForwarder {
     
+    public void start();
+    
     public void preserve(NNMEvent event);
     
     public void accept(NNMEvent event);
     
     public void discard(NNMEvent event);
+    
+    public void stop();
     
 
 }

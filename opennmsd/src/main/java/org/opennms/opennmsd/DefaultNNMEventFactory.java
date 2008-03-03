@@ -43,11 +43,6 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
             
         }
 
-        // add formatting information to event
-        EventFormat format = m_eventConfiguration.getFormat(e);
-        format.apply(e);
-
-
         // fix up event fields for nnm-internal events
         String newAddr = e.getVarBindValue(".1.3.6.1.4.1.11.2.17.2.2.0");
         if (newAddr != null) {
@@ -63,6 +58,10 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
                 log.info("Unable to resolve "+newAddr+" as hostname/ipAddress for event "+e+" using trap supplied values");
             }
         }
+
+        // add formatting information to event
+        EventFormat format = m_eventConfiguration.getFormat(e);
+        format.apply(e);
 
         return e;
     }

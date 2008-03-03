@@ -2,9 +2,12 @@ package org.opennms.opennmsd;
 
 import java.util.Arrays;
 
+import org.apache.log4j.Logger;
 import org.opennms.nnm.SnmpObjId;
 
 public class EventFormat implements Comparable {
+    
+    private static Logger log = Logger.getLogger(EventFormat.class);
     
     public static class WildCardSnmpObjId implements Comparable {
         
@@ -129,7 +132,10 @@ public class EventFormat implements Comparable {
             if (m_hosts != null) {
                 // make sure the host is in the list
                 String nodeLabel = e.resolveNodeLabel(r);
-                return Arrays.binarySearch(m_hosts, nodeLabel, String.CASE_INSENSITIVE_ORDER) >= 0;
+                
+                boolean hostMatch = Arrays.binarySearch(m_hosts, nodeLabel, String.CASE_INSENSITIVE_ORDER) >= 0;
+                log.debug("Checking to see if "+nodeLabel+" is in NODES list for "+m_name+"... "+(hostMatch ? "yes" : "no"));
+                return hostMatch;
             }
             // no host so it matches by default
             return true;
