@@ -20,6 +20,8 @@ public class Main {
             
             OpenNMSDaemon daemon = new OpenNMSDaemon();
             
+            Resolver resolver = new DefaultResolver();
+            
             DefaultConfiguration config = new DefaultConfiguration();
             config.setConfigFile(new File(args[0]));
             config.load();
@@ -28,11 +30,12 @@ public class Main {
             DefaultEventForwarder forwarder = new DefaultEventForwarder();
             forwarder.setOpenNmsHost(config.getOpenNmsHost());
             forwarder.setPort(config.getPort())
+            forwarder.setResolver(resolver);
             daemon.setEventForwarder(forwarder);
             
             TrapdConfiguration trapdConf = new TrapdConfiguration();
             trapdConf.setTrapConf(new File(args[1]));
-            trapdConf.setResolver(new DefaultResolver());
+            trapdConf.setResolver(resolver);
             trapdConf.load();
 
             DefaultNNMEventFactory eventFactory = new DefaultNNMEventFactory();
