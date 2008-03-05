@@ -116,7 +116,20 @@ public class EventFormat implements Comparable {
     }
     
     public String toString() {
-         return "EVENT "+m_name+" "+m_eventObjectId+" \""+m_category+"\" "+m_severity + (m_hosts == null ? "" : " NODES "+Arrays.toString(m_hosts));
+         return "EVENT "+m_name+" "+m_eventObjectId+" \""+m_category+"\" "+m_severity + (m_hosts == null ? "" : " NODES "+ toString(m_hosts));
+    }
+    
+   
+    static String toString(Object[] nodes) {
+        StringBuffer buf = new StringBuffer("[");
+        for(int i = 0; i < nodes.length; i++) {
+            if (i != 0) {
+                buf.append(", ");
+            }
+            buf.append(nodes[i]);
+        }
+        buf.append("]");
+        return buf.toString();
     }
 
     public String[] getHosts() {

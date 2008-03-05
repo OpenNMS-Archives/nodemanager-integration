@@ -110,7 +110,7 @@ public class EventFormatTest extends TestCase {
         
         EventFormat[] expectedArray = { h, e, g, a, d,f, j, c, b, i };
 
-        System.err.println(Arrays.toString(actualArray));
+        System.err.println(EventFormat.toString(actualArray));
         for(int index = 0; index < actualArray.length; index++) {
             assertSame(expectedArray[index], actualArray[index]);
         }
