@@ -46,12 +46,20 @@ public abstract class AbstractEventForwarder implements EventForwarder, Runnable
     
     private static Logger log = Logger.getLogger(AbstractEventForwarder.class);
     
-    BlockingQueue m_queue = new LinkedBlockingQueue();
-    Thread m_thread;
+    private BlockingQueue m_queue = new LinkedBlockingQueue();
+    private Thread m_thread;
+    private boolean m_stopped = false;
     
-    public AbstractEventForwarder() {
+    public void start() {
+        m_stopped = false;
         m_thread = new Thread(this, "EventForwarderThread");
         m_thread.start();
+        log.debug("Starting event forwarding");
+    }
+    
+    public void stop() {
+        log.debug("Stopping event forwarding");
+        m_stopped = true;
     }
     
     /* (non-Javadoc)
@@ -82,7 +90,7 @@ public abstract class AbstractEventForwarder implements EventForwarder, Runnable
         
         try {
 
-            while(true) {
+            while(!m_stopped) {
                 NNMEvent event = (NNMEvent)m_queue.take();
                 
                 log.debug("Event available to forward");

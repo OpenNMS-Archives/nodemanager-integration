@@ -45,6 +45,7 @@ class DefaultEventForwarder extends AbstractEventForwarder {
     private String m_openNmsHost;
     private int m_port;
     private DateFormat m_dateFormat;
+    private Resolver m_resolver;
     
     public DefaultEventForwarder() {
         m_log.debug("DefaultEventForwarder created")
@@ -83,18 +84,129 @@ class DefaultEventForwarder extends AbstractEventForwarder {
         m_resolver = resolver;
     }
     
-    protected void forwardEvents(List eventsToForward) {
-        
+    public void start() {
         assert m_openNmsHost;
         assert m_port;
         assert m_resolver;
+
+        try {
+            sendPlainEvent("uei.opennms.org/external/nnm/opennmsdStart")
+        } catch (Exception e) {
+            m_log.warn("Unable to send start event to opennms", e);
+        }
         
+        super.start();
+        
+    }
+    
+    public void stop() {
+        
+        super.stop();
+
+        try {
+            sendPlainEvent("uei.opennms.org/external/nnm/opennmsdStop")
+        } catch (Exception e) {
+            m_log.warn("Unable to send stop event to opennms", e);
+        }
+        
+    }
+    
+    public sendPlainEvent(String eventUei) {
+        withEventXml { xml ->
+            xml.log {
+                events {
+                    event {
+                        uei(eventUei)
+                        source("opennmsd")
+                        time(m_dateFormat.format(new Date()))
+                        host(m_host)
+                    }
+                }
+            }
+        }
+    }
+    
+    public withEventXml(Closure c) throws IOException {
+        Socket socket = null;
+        try {
+            socket = new Socket(m_openNmsHost, m_port);
+            socket.outputStream.withWriter { out ->
+                def xml = new MarkupBuilder(out);
+                c.call(xml);
+            }
+        } finally {
+            try { if (socket != null) socket.close(); } catch (IOException e) { m_log.info("Failed to close the socket to opennms.") }
+        }
+    }
+    
+    protected void forwardEvents(List eventsToForward) {
+        int count = eventsToForward.size();
+        m_log.debug("openNmsHost is ${m_openNmsHost} forwarding ${eventsToForward.size()} events.")
+
+        try {
+            withEventXml { xml ->
+                xml.log {
+                    events {
+                        for(NNMEvent e in eventsToForward) {
+                            m_log.debug("Forwarding event: ${e.name}")
+                            event {
+                                uei("uei.opennms.org/external/nnm/${e.name}")
+                                source("opennmsd")
+                                time(m_dateFormat.format(e.timeStamp))
+                                host(m_host)
+                                'interface'(e.agentAddress)
+                                snmphost(e.snmpHost)
+                                snmp {
+                                    id(e.enterpriseId)
+                                    generic(e.generic)
+                                    specific(e.specific)
+                                    version(e.version)
+                                    community(e.community)
+                                    //'time-stamp'(m_dateFormat.format(e.timeStamp))
+                                }
+                                List varBinds = e.varBinds;
+                                parms {
+                                    for(NNMVarBind v in varBinds) {   
+                                        m_log.debug("adding varbind")
+                                        m_log.debug("varbind ${v.objectId}=${v.value}")
+                                        parm {
+                                            parmName(v.objectId)
+                                            value(v.value)
+                                        }                              
+                                    }
+                                    parm {
+                                        parmName("nnmEventOid")
+                                        value(e.eventObjectId)
+                                    }
+                                    parm {
+                                        parmName("nodelabel")
+                                        value(e.resolveNodeLabel(m_resolver))
+                                    }
+                                }
+                            }
+                            m_log.debug("finished creating event xml")
+                        }
+                    }
+                }
+            
+            }
+        } catch (Exception e) {
+            m_log.debug("Exception occurred", e)  
+        } finally {
+            m_log.debug("finished sending eventList ${eventsToForward}")
+        }
+    
+    }
+    
+    protected void OLDforwardEvents(List eventsToForward) {
+        
+        int count = eventsToForward.size();
+        m_log.debug("openNmsHost is ${m_openNmsHost} forwarding ${eventsToForward.size()} events.")
+
         Socket socket = null;
         
         try {
         
-        int count = eventsToForward.size();
-        m_log.debug("openNmsHost is ${m_openNmsHost} forwarding ${eventsToForward.size()} events.")
         socket = new Socket(m_openNmsHost, m_port);
         socket.outputStream.withWriter { out ->
         
@@ -124,18 +236,18 @@ class DefaultEventForwarder extends AbstractEventForwarder {
                               for(NNMVarBind v in varBinds) {   
                                   m_log.debug("adding varbind")
                                   m_log.debug("varbind ${v.objectId}=${v.value}")
-                          	      parm {
-                          	          parmName(v.objectId)
-                          	          value(v.value)
-                          	      }                              
-                             	}
+                                  parm {
+                                      parmName(v.objectId)
+                                      value(v.value)
+                                  }                              
+                                }
                                 parm {
                                     parmName("nnmEventOid")
                                     value(e.eventObjectId)
                                 }
                                 parm {
                                     parmName("nodelabel")
-                                    value(e.resolveNodeLabel(r))
+                                    value(e.resolveNodeLabel(m_resolver))
                                 }
                              }
                       }

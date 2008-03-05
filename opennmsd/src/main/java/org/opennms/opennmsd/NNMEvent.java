@@ -174,6 +174,9 @@ public class NNMEvent {
     }
     
     public String getVarBindValue(String oid) {
+        if (m_varBinds == null) {
+            return null;
+        }
         for(Iterator it = m_varBinds.iterator(); it.hasNext(); ) {
             NNMVarBind varBind = (NNMVarBind)it.next();
             if (oid.equals(varBind.getObjectId())) {
