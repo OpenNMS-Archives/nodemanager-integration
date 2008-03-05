@@ -13,12 +13,8 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
     
     private static Logger log = Logger.getLogger(DefaultNNMEventFactory.class);
 
-    
     private EventConfiguration m_eventConfiguration;
 
-
-    protected static long s_startTime = System.currentTimeMillis();
-    
     public void setEventConfiguation(EventConfiguration eventConfiguration) {
         m_eventConfiguration = eventConfiguration;
     }
@@ -30,7 +26,7 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
         
         e.setAgentAddress(trap.getAgentAddress());
         e.setSnmpHost(trap.getIpAddress());
-        e.setTimeStamp(new Date(DefaultNNMEventFactory.s_startTime+trap.getTime()*10));
+        e.setTimeStamp(new Date());
         e.setCommunity(trap.getCommunity());
         e.setVersion(1);
         

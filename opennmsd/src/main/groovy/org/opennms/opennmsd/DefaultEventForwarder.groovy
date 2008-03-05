@@ -89,7 +89,11 @@ class DefaultEventForwarder extends AbstractEventForwarder {
         assert m_port;
         assert m_resolver;
 
-        sendPlainEvent("uei.opennms.org/external/nnm/opennmsdStart")
+        try {
+            sendPlainEvent("uei.opennms.org/external/nnm/opennmsdStart")
+        } catch (Exception e) {
+            m_log.warn("Unable to send start event to opennms", e);
+        }
         
         super.start();
         
@@ -99,7 +103,11 @@ class DefaultEventForwarder extends AbstractEventForwarder {
         
         super.stop();
 
-        sendPlainEvent("uei.opennms.org/external/nnm/opennmsdStop")
+        try {
+            sendPlainEvent("uei.opennms.org/external/nnm/opennmsdStop")
+        } catch (Exception e) {
+            m_log.warn("Unable to send stop event to opennms", e);
+        }
         
     }
     
