@@ -26,6 +26,8 @@ public class NNMEvent {
     // This fields caches the resolved agentAddress for using in forwarding
     private String m_nodeLabel;
     
+    private boolean m_persistent;
+    
     public NNMEvent(String enterpriseObjectId, int genericType, int specificType) {
         m_eventIdentity = new EventIdentity(enterpriseObjectId, genericType, specificType);
     }
@@ -151,6 +153,14 @@ public class NNMEvent {
         return m_eventIdentity.getEventObjectId();
     }
     
+    public boolean isPersistent() {
+        return m_persistent;
+    }
+    
+    public void setPersistent(boolean persistent) {
+        m_persistent = persistent;
+    }
+    
     public String toString() {
         return "NNMEvent[name="+getName()+", address="+getAgentAddress()+", category="+getCategory()+", severity="+getSeverity()+", oid="+getEventObjectId()+"]";
     }
@@ -185,5 +195,7 @@ public class NNMEvent {
         }
         return null;
     }
+    
+
 
 }

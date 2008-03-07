@@ -11,6 +11,8 @@ class DefaultConfiguration extends AbstractConfiguration {
     private FilterChain m_chain;
     private String m_opennmsHost;
     private int m_port;
+    private int m_maxBatchSize;
+    private int m_maxPersistentEvents;
     
     public String getOpenNmsHost() {
         return m_opennmsHost;
@@ -20,6 +22,14 @@ class DefaultConfiguration extends AbstractConfiguration {
         return m_port;
     }
     
+    public int getMaxBatchSize() {
+        return m_maxBatchSize;
+    }
+    
+    public int getMaxPersistentEvents() {
+        return m_maxPersistentEvents;
+    }
+    
     public void load() throws IOException {
 
         super.load();
@@ -27,9 +37,11 @@ class DefaultConfiguration extends AbstractConfiguration {
         log.info("Parsing config file "+getConfigFile())
         
         Node config = new XmlParser().parse(getConfigFile());
-        
+
         m_opennmsHost = config.'opennms-host'.'@host-address'[0];
         m_port = config.'opennms-host'.'@port'[0].toInteger();
+        m_maxBatchSize = config.'opennms-host'.'@max-batch-size'[0].toInteger();
+        m_maxPersistentEvents = config.'opennms-host'.'@max-persistent-events'[0].toInteger();
         
         log.debug("opennmsHost is ${m_opennmsHost}")
         log.debug("port is ${m_port}")

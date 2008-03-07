@@ -30,6 +30,8 @@ public class Main {
             DefaultEventForwarder forwarder = new DefaultEventForwarder();
             forwarder.setOpenNmsHost(config.getOpenNmsHost());
             forwarder.setPort(config.getPort())
+            forwarder.setMaxBatchSize(config.getMaxBatchSize());
+            forwarder.setMaxPersistentEvents(config.getMaxPersistentEvents());
             forwarder.setResolver(resolver);
             daemon.setEventForwarder(forwarder);
             

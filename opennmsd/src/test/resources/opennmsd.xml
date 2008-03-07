@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <opennmsd-configuration> 
-    <opennms-host host-address="127.0.0.1" port="5817" /> 
+    <opennms-host host-address="127.0.0.1" port="5817" max-batch-size="100"  max-persistent-events="300000" /> 
     <filters> 
         <filter action="discard" category="LOGONLY" /> 
         <filter action="accept" severity="Critical" /> 

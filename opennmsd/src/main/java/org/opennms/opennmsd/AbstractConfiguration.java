@@ -56,8 +56,12 @@ public abstract class AbstractConfiguration implements Configuration {
     }
 
     abstract public FilterChain getFilterChain();
-
+    abstract public String getOpenNmsHost();
     
-	
+    abstract public int getPort();
+
+    abstract public int getMaxBatchSize();
+
+    abstract public int getMaxPersistentEvents();
 
 }
