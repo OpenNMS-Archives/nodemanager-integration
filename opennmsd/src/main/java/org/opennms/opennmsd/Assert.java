@@ -37,4 +37,10 @@ public abstract class Assert {
         }
     }
 
+    public static void isTrue(String string, boolean b) {
+        if (!b) {
+            throw new IllegalArgumentException(string);
+        }
+    }
+
 }

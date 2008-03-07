@@ -1,3 +1,32 @@
+/*
+ * This file is part of the OpenNMS(R) Application.
+ *
+ * OpenNMS(R) is Copyright (C) 2008 The OpenNMS Group, Inc.  All rights reserved.
+ * OpenNMS(R) is a derivative work, containing both original code, included code and modified
+ * code that was published under the GNU General Public License. Copyrights for modified
+ * and included code are below.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * For more information contact:
+ * OpenNMS Licensing       <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ */
 package org.opennms.opennmsd;
 
 import java.util.Date;
@@ -26,7 +55,8 @@ public class NNMEvent {
     // This fields caches the resolved agentAddress for using in forwarding
     private String m_nodeLabel;
     
-    private boolean m_persistent;
+    // This field is used to know whether the trap can be thrown away whan a communication outage occurs
+    private boolean m_preserved;
     
     public NNMEvent(String enterpriseObjectId, int genericType, int specificType) {
         m_eventIdentity = new EventIdentity(enterpriseObjectId, genericType, specificType);
@@ -153,16 +183,21 @@ public class NNMEvent {
         return m_eventIdentity.getEventObjectId();
     }
     
-    public boolean isPersistent() {
-        return m_persistent;
+    public boolean isPreserved() {
+        return m_preserved;
     }
     
-    public void setPersistent(boolean persistent) {
-        m_persistent = persistent;
+    public void setPreserved(boolean preserved) {
+        m_preserved = preserved;
     }
     
     public String toString() {
-        return "NNMEvent[name="+getName()+", address="+getAgentAddress()+", category="+getCategory()+", severity="+getSeverity()+", oid="+getEventObjectId()+"]";
+        return "NNMEvent[name="+getName()+
+            ", address="+getAgentAddress()+
+            ", category="+getCategory()+
+            ", severity="+getSeverity()+
+            ", oid="+getEventObjectId()+
+            "]";
     }
 
     public static NNMEvent createEvent(String category, String severity,

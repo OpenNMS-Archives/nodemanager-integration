@@ -37,7 +37,7 @@ public interface Configuration {
 
     public int getMaxBatchSize();
 
-    public int getMaxPersistentEvents();
+    public int getMaxPreservedEvents();
 
     public FilterChain getFilterChain();
 

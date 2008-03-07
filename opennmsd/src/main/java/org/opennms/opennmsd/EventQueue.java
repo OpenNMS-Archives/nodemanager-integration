@@ -41,24 +41,24 @@ import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * An EventQueue that handles the differentiation between persistent and only accepted events.
+ * An EventQueue that handles the differentiation between preserved and only accepted events.
  * 
  * The order of events is as follows m_nextBatch first if not null, then the events
- * in m_persistentQueue. Then any events that exist are in m_queue.
+ * in m_preservedQueue. Then any events that exist are in m_queue.
  * 
  * State transition:
  * 
  * Forwarding: 
  *  getEventsToForward() returns a batch of up to maxBatch events from queue
  *  
- *  addEventToPersistentQ:
+ *  addEventToPerservedQ:
  *    if (not max'd) add it
  *    if (max'd) clear queue then add it
  *  
  *  if (success) state=Forwarding
  *  if (failure) {
- *      add all persistent events that failed to persistentQ
- *      if (persistentQ is empty) {
+ *      add all perserved events that failed to preserveQ
+ *      if (preserveQ is empty) {
  *         state=Forwarding
  *      } else {
  *         state=Failing
@@ -66,15 +66,15 @@ import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
  *  }
  *  
  * Failing:
- *  addEventToPersistentQ:
+ *  addEventToPerserveQ:
  *    if (not max'd) add it
  *    if (max'd) clear nextBatch, clear queue then add it
  *  
- *  // this state should imply that one of nextBatch and persistenQ is not empty
- *  remove all queue events and put pending ones into persistentQ list
+ *  // this state should imply that one of nextBatch and preserveQ is not empty
+ *  remove all queue events and put pending ones into preserveQ list
  *  
  *  if nextBatch is not filled to maxBatchSize events then add as many events as are available
- *  from the peristentQ to nextBatch
+ *  from the preserveQ to nextBatch
  *
  *  return nextBatch
  *  
@@ -82,22 +82,22 @@ import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
  *  if (failure) state = Failing
  *  if (success) 
  *    nextBatch.clear
- *    if (persistentQ is empty) state = Forwarding
+ *    if (preserveQ is empty) state = Forwarding
  *    else state = Recovering
  *    
  *    
  *  Recovering:
- *  addEventToPersistentQ:
+ *  addEventToPreserveQ:
  *    if (not max'd) add it
  *    if (max'd) clear nextBatch clear queue then add it
 
  *    // next batch should be empty at the beginning of the call
  *    getEventsToForward() 
-        fill nextBatch with as many as possible events from persistenQ
+        fill nextBatch with as many as possible events from preserveQ
         return nextBatch
  *    
  *    if (success) {
- *       if (persistentQ is empty) { state = Forwarding }
+ *       if (preserveQ is empty) { state = Forwarding }
  *       else { state = Recovering }
  *    } 
  *    
@@ -119,28 +119,32 @@ public class EventQueue {
         abstract void forwardSuccessful(List events);
         abstract void forwardFailed(List events);
 
-        protected void addToPersistentQueue(NNMEvent e) {
-            if (m_persistentQueue.size() >= m_maxPersistentEvents) {
+        protected void addToPreservedQueue(NNMEvent e) {
+            if (m_preservedQueue.size() >= m_maxPreservedEvents) {
                 m_nextBatch.clear();
-                m_persistentQueue.clear();
+                m_preservedQueue.clear();
             }
-            m_persistentQueue.offer(e);
+            m_preservedQueue.offer(e);
         }
         
-        protected void discardNonPersistentEvents() {
+        protected void discardNonPreservedEvents() {
             List events = new ArrayList(m_queue.size());
             m_queue.drainTo(events);
             
+            addPreservedToPreservedQueue(events);
+        }
+
+        protected void addPreservedToPreservedQueue(List events) {
             for(Iterator it = events.iterator(); it.hasNext(); ) {
                 NNMEvent e = (NNMEvent)it.next();
-                if (e.isPersistent()) {
-                    addToPersistentQueue(e);
+                if (e.isPreserved()) {
+                    addToPreservedQueue(e);
                 }
             }
         }
 
         protected void loadNextBatch() {
-            m_persistentQueue.drainTo(m_nextBatch, m_maxBatchSize - m_nextBatch.size());
+            m_preservedQueue.drainTo(m_nextBatch, m_maxBatchSize - m_nextBatch.size());
         }
         
     }
@@ -164,15 +168,10 @@ public class EventQueue {
         }
 
         public void forwardFailed(List events) {
-            for(Iterator it = events.iterator(); it.hasNext(); ) {
-                NNMEvent e = (NNMEvent)it.next();
-                
-                if (e.isPersistent()) {
-                    addToPersistentQueue(e);
-                }
-            }
             
-            if (!m_persistentQueue.isEmpty()) {
+            addPreservedToPreservedQueue(events);
+            
+            if (!m_preservedQueue.isEmpty()) {
                setState(FAILING);
             }
         }
@@ -186,7 +185,7 @@ public class EventQueue {
     private final State FAILING = new State() {
 
         public List getEventsToForward() {
-            discardNonPersistentEvents();
+            discardNonPreservedEvents();
 
             loadNextBatch();
             return m_nextBatch;
@@ -198,7 +197,7 @@ public class EventQueue {
 
         public void forwardSuccessful(List events) {
             m_nextBatch.clear();
-            if (m_persistentQueue.isEmpty()) {
+            if (m_preservedQueue.isEmpty()) {
                 setState(FORWARDING);
             } else {
                 setState(RECOVERING);
@@ -221,7 +220,7 @@ public class EventQueue {
         }
 
         public void forwardSuccessful(List events) {
-            if (m_persistentQueue.isEmpty()) {
+            if (m_preservedQueue.isEmpty()) {
                 setState(FORWARDING);
             }
         }
@@ -234,14 +233,14 @@ public class EventQueue {
     
 
     // operational parameters
-    private int m_maxPersistentEvents = 300000;
+    private int m_maxPreservedEvents = 300000;
     private int m_maxBatchSize = 100;
 
     // queue for all events to be forwarded
     private BlockingQueue m_queue = new LinkedBlockingQueue();
     
-    // queue for persistent events that are being saved during a forwarding failure
-    private BlockingQueue m_persistentQueue = new LinkedBlockingQueue();
+    // queue for preserving events that are being saved during a forwarding failure
+    private BlockingQueue m_preservedQueue = new LinkedBlockingQueue();
     
     // a list of events that are pending due to a forwarding failure
     private List m_nextBatch;
@@ -254,12 +253,12 @@ public class EventQueue {
         log.debug("Setting state of EventQueue to "+m_state);
     }
     
-    public int getMaxPersistentEvents() {
-        return m_maxPersistentEvents;
+    public int getMaxPreservedEvents() {
+        return m_maxPreservedEvents;
     }
 
-    public void setMaxPersistentEvents(int maxPersistentEvents) {
-        m_maxPersistentEvents = maxPersistentEvents;
+    public void setMaxPreservedEvents(int maxPreservedEvents) {
+        m_maxPreservedEvents = maxPreservedEvents;
     }
 
     public int getMaxBatchSize() {
@@ -282,8 +281,8 @@ public class EventQueue {
         m_queue.offer(e);
     }
     
-    public void persist(NNMEvent e) {
-        e.setPersistent(true);
+    public void preserve(NNMEvent e) {
+        e.setPreserved(true);
         m_queue.offer(e);
     }
     

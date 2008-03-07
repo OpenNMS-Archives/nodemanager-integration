@@ -56,7 +56,7 @@ public class EventQueueTest extends TestCase {
         queue.init();
     
         queue.accept(createEvent());
-        queue.persist(createEvent());
+        queue.preserve(createEvent());
         queue.accept(createEvent());
         
         List events = queue.getEventsToForward();
@@ -65,9 +65,9 @@ public class EventQueueTest extends TestCase {
         
         queue.forwardSuccessful(events);
         
-        queue.persist(createEvent());
+        queue.preserve(createEvent());
         queue.accept(createEvent());
-        queue.persist(createEvent());
+        queue.preserve(createEvent());
         queue.accept(createEvent());
         
         events = queue.getEventsToForward();
@@ -91,7 +91,7 @@ public class EventQueueTest extends TestCase {
         queue.init();
     
         queue.accept(createEvent());  // 1
-        queue.persist(createEvent()); // 2
+        queue.preserve(createEvent()); // 2
         queue.accept(createEvent());  // 3
         
         List events = queue.getEventsToForward();
@@ -100,9 +100,9 @@ public class EventQueueTest extends TestCase {
         
         queue.forwardSuccessful(events);
         
-        queue.persist(createEvent()); // 4
+        queue.preserve(createEvent()); // 4
         queue.accept(createEvent());  // 5
-        queue.persist(createEvent()); // 6
+        queue.preserve(createEvent()); // 6
         queue.accept(createEvent());  // 7
         
         events = queue.getEventsToForward();
@@ -116,39 +116,39 @@ public class EventQueueTest extends TestCase {
         events = queue.getEventsToForward();
         assertNotNull(events);
         assertEquals(2, events.size());
-        assertPersistentEvent(events, 0, "4");
-        assertPersistentEvent(events, 1, "6");
+        assertPreservedEvent(events, 0, "4");
+        assertPreservedEvent(events, 1, "6");
         
         queue.forwardFailed(events);
         
-        queue.persist(createEvent()); // 9
+        queue.preserve(createEvent()); // 9
         queue.accept(createEvent()); // 10
-        queue.persist(createEvent()); // 11
+        queue.preserve(createEvent()); // 11
         queue.accept(createEvent()); // 12
         
         events = queue.getEventsToForward();
         assertNotNull(events);
         assertEquals(3, events.size());
-        assertPersistentEvent(events, 0, "4");
-        assertPersistentEvent(events, 1, "6");
-        assertPersistentEvent(events, 2, "9");
+        assertPreservedEvent(events, 0, "4");
+        assertPreservedEvent(events, 1, "6");
+        assertPreservedEvent(events, 2, "9");
         
         queue.forwardSuccessful(events);
 
-        queue.persist(createEvent()); // 13
+        queue.preserve(createEvent()); // 13
         queue.accept(createEvent()); // 14
 
         events = queue.getEventsToForward();
         assertNotNull(events);
         assertEquals(1, events.size());
-        assertPersistentEvent(events, 0, "11");
+        assertPreservedEvent(events, 0, "11");
 
         queue.forwardSuccessful(events);
 
         events = queue.getEventsToForward();
         assertNotNull(events);
         assertEquals(2, events.size());
-        assertPersistentEvent(events, 0, "13");
+        assertPreservedEvent(events, 0, "13");
         assertEquals("14", getEvent(events, 1).getName());
 
         queue.forwardSuccessful(events);
@@ -156,8 +156,8 @@ public class EventQueueTest extends TestCase {
         
     }
 
-    private void assertPersistentEvent(List events, int index, String name) {
-        assertTrue(getEvent(events, index).isPersistent());
+    private void assertPreservedEvent(List events, int index, String name) {
+        assertTrue(getEvent(events, index).isPreserved());
         assertEquals(name, getEvent(events, index).getName());
     }
 

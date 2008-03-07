@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
  * It passes them on to the forwardEvents method implemented by base classes in batches as they are 
  * added to the queue.  The forwardEvents method does the actual work of sending them to opennms.
  * 
- * persist, accept and discard are called to add the events to the queue as appropriate.  
+ * preserve, accept and discard are called to add the events to the queue as appropriate.  
  * 
  *
  * @author brozow
@@ -64,8 +64,8 @@ public abstract class AbstractEventForwarder implements EventForwarder, Runnable
         m_queue.setMaxBatchSize(maxBatchSize);
     }
     
-    public void setMaxPersistentEvents(int maxPersistentEvents) {
-        m_queue.setMaxPersistentEvents(maxPersistentEvents);
+    public void setMaxPreservedEvents(int maxPreservedEvents) {
+        m_queue.setMaxPreservedEvents(maxPreservedEvents);
     }
     
     public void start() {
@@ -101,7 +101,7 @@ public abstract class AbstractEventForwarder implements EventForwarder, Runnable
      * @see org.opennms.opennmsd.EventForwarder#preserve(org.opennms.opennmsd.NNMEvent)
      */
     public void preserve(NNMEvent event) {
-        m_queue.persist(event);
+        m_queue.preserve(event);
     }
 
     public void run() {

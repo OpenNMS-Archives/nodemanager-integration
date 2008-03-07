@@ -62,6 +62,6 @@ public abstract class AbstractConfiguration implements Configuration {
 
     abstract public int getMaxBatchSize();
 
-    abstract public int getMaxPersistentEvents();
+    abstract public int getMaxPreservedEvents();
 
 }
