@@ -49,7 +49,7 @@ class DefaultEventForwarder extends AbstractEventForwarder {
     
     public DefaultEventForwarder() {
         m_log.debug("DefaultEventForwarder created")
-        m_host = InetAddress.getLocalHost().hostAddress;
+        m_host = InetAddress.getLocalHost().hostName;
         
         m_dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
         m_dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -145,6 +145,7 @@ class DefaultEventForwarder extends AbstractEventForwarder {
 
         try {
             withEventXml { xml ->
+              if (eventsToForward) {
                 xml.log {
                     events {
                         for(NNMEvent e in eventsToForward) {
@@ -188,10 +189,9 @@ class DefaultEventForwarder extends AbstractEventForwarder {
                         }
                     }
                 }
+              }
             
             }
-        } catch (Exception e) {
-            m_log.debug("Exception occurred", e)  
         } finally {
             m_log.debug("finished sending eventList ${eventsToForward}")
         }

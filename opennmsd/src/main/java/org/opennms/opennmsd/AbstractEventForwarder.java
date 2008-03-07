@@ -29,16 +29,20 @@
  */
 package org.opennms.opennmsd;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
-import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
-
 /**
- * DefaultEventForwarder
+ * AbstractEventForwarder
+ * 
+ * The purpose of this class is manage the queue of events that need to be forward to opennms.
+ * 
+ * It passes them on to the forwardEvents method implemented by base classes in batches as they are 
+ * added to the queue.  The forwardEvents method does the actual work of sending them to opennms.
+ * 
+ * preserve, accept and discard are called to add the events to the queue as appropriate.  
+ * 
  *
  * @author brozow
  */
@@ -46,12 +50,27 @@ public abstract class AbstractEventForwarder implements EventForwarder, Runnable
     
     private static Logger log = Logger.getLogger(AbstractEventForwarder.class);
     
-    private BlockingQueue m_queue = new LinkedBlockingQueue();
     private Thread m_thread;
     private boolean m_stopped = false;
+
+    private EventQueue m_queue = new EventQueue();
+    private long m_retryInterval = 1000;
+    
+    public void setRetryInterval(int retryInterval) {
+        m_retryInterval = retryInterval;
+    }
+    
+    public void setMaxBatchSize(int maxBatchSize) {
+        m_queue.setMaxBatchSize(maxBatchSize);
+    }
+    
+    public void setMaxPreservedEvents(int maxPreservedEvents) {
+        m_queue.setMaxPreservedEvents(maxPreservedEvents);
+    }
     
     public void start() {
         m_stopped = false;
+        m_queue.init();
         m_thread = new Thread(this, "EventForwarderThread");
         m_thread.start();
         log.debug("Starting event forwarding");
@@ -62,28 +81,27 @@ public abstract class AbstractEventForwarder implements EventForwarder, Runnable
         m_stopped = true;
     }
     
+    
+    
     /* (non-Javadoc)
      * @see org.opennms.opennmsd.EventForwarder#accept(org.opennms.opennmsd.NNMEvent)
      */
     public void accept(NNMEvent event) {
-        log.debug("accepting event "+event);
-        m_queue.offer(event);
+        m_queue.accept(event);
     }
 
     /* (non-Javadoc)
      * @see org.opennms.opennmsd.EventForwarder#discard(org.opennms.opennmsd.NNMEvent)
      */
     public void discard(NNMEvent event) {
-        log.debug("discarding event "+event);
-        // do nothing when we discard an event
+        m_queue.discard(event);
     }
 
     /* (non-Javadoc)
      * @see org.opennms.opennmsd.EventForwarder#preserve(org.opennms.opennmsd.NNMEvent)
      */
     public void preserve(NNMEvent event) {
-        log.debug("preserving event "+event);
-        m_queue.offer(event);
+        m_queue.preserve(event);
     }
 
     public void run() {
@@ -91,18 +109,20 @@ public abstract class AbstractEventForwarder implements EventForwarder, Runnable
         try {
 
             while(!m_stopped) {
-                NNMEvent event = (NNMEvent)m_queue.take();
+
+                List eventsToForward = m_queue.getEventsToForward();
                 
-                log.debug("Event available to forward");
-                
-                List events = new LinkedList();
-                events.add(event);
-                
-                m_queue.drainTo(events);
-                
-                log.debug("forwarding "+events.size()+" events."+events);
-            
-                forwardEvents(events);
+                try {
+                    forwardEvents(eventsToForward);
+                    m_queue.forwardSuccessful(eventsToForward);
+                } catch (Exception e) {
+                    log.error("Unable to forward events", e);
+                    m_queue.forwardFailed(eventsToForward);
+                    if (!m_stopped) {
+                        // a failure occurred so sleep a moment and try again
+                        Thread.sleep(m_retryInterval);
+                    }
+                }
             
             }
         
@@ -112,6 +132,6 @@ public abstract class AbstractEventForwarder implements EventForwarder, Runnable
         
     }
 
-    protected abstract void forwardEvents(List events);
+    protected abstract void forwardEvents(List events) throws Exception;
 
 }
