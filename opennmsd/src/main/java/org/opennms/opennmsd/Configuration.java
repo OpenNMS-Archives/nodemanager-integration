@@ -31,6 +31,14 @@ package org.opennms.opennmsd;
 
 public interface Configuration {
     
+    public String getOpenNmsHost();
+    
+    public int getPort();
+
+    public int getMaxBatchSize();
+
+    public int getMaxPreservedEvents();
+
     public FilterChain getFilterChain();
 
 }

@@ -30,8 +30,8 @@
 
 package org.opennms.opennmsd;
 
- import java.text.DateFormat;
- import java.text.SimpleDateFormat;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
  
 import org.apache.log4j.Logger
 import org.opennms.opennmsd.AbstractEventForwarder
@@ -49,7 +49,7 @@ class DefaultEventForwarder extends AbstractEventForwarder {
     
     public DefaultEventForwarder() {
         m_log.debug("DefaultEventForwarder created")
-        m_host = InetAddress.getLocalHost().hostAddress;
+        m_host = InetAddress.getLocalHost().hostName;
         
         m_dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
         m_dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -89,41 +89,18 @@ class DefaultEventForwarder extends AbstractEventForwarder {
         assert m_port;
         assert m_resolver;
 
-        try {
-            sendPlainEvent("uei.opennms.org/external/nnm/opennmsdStart")
-        } catch (Exception e) {
-            m_log.warn("Unable to send start event to opennms", e);
-        }
-        
+        preserve(StatusEvent.createStartEvent());
+
         super.start();
         
     }
     
     public void stop() {
+
+        preserve(StatusEvent.createStopEvent());
         
         super.stop();
-
-        try {
-            sendPlainEvent("uei.opennms.org/external/nnm/opennmsdStop")
-        } catch (Exception e) {
-            m_log.warn("Unable to send stop event to opennms", e);
-        }
         
-    }
-    
-    public sendPlainEvent(String eventUei) {
-        withEventXml { xml ->
-            xml.log {
-                events {
-                    event {
-                        uei(eventUei)
-                        source("opennmsd")
-                        time(m_dateFormat.format(new Date()))
-                        host(m_host)
-                    }
-                }
-            }
-        }
     }
     
     public withEventXml(Closure c) throws IOException {
@@ -138,130 +115,28 @@ class DefaultEventForwarder extends AbstractEventForwarder {
             try { if (socket != null) socket.close(); } catch (IOException e) { m_log.info("Failed to close the socket to opennms.") }
         }
     }
-    
+
     protected void forwardEvents(List eventsToForward) {
         int count = eventsToForward.size();
         m_log.debug("openNmsHost is ${m_openNmsHost} forwarding ${eventsToForward.size()} events.")
 
         try {
             withEventXml { xml ->
-                xml.log {
-                    events {
-                        for(NNMEvent e in eventsToForward) {
-                            m_log.debug("Forwarding event: ${e.name}")
-                            event {
-                                uei("uei.opennms.org/external/nnm/${e.name}")
-                                source("opennmsd")
-                                time(m_dateFormat.format(e.timeStamp))
-                                host(m_host)
-                                'interface'(e.agentAddress)
-                                snmphost(e.snmpHost)
-                                snmp {
-                                    id(e.enterpriseId)
-                                    generic(e.generic)
-                                    specific(e.specific)
-                                    version(e.version)
-                                    community(e.community)
-                                    //'time-stamp'(m_dateFormat.format(e.timeStamp))
-                                }
-                                List varBinds = e.varBinds;
-                                parms {
-                                    for(NNMVarBind v in varBinds) {   
-                                        m_log.debug("adding varbind")
-                                        m_log.debug("varbind ${v.objectId}=${v.value}")
-                                        parm {
-                                            parmName(v.objectId)
-                                            value(v.value)
-                                        }                              
-                                    }
-                                    parm {
-                                        parmName("nnmEventOid")
-                                        value(e.eventObjectId)
-                                    }
-                                    parm {
-                                        parmName("nodelabel")
-                                        value(e.resolveNodeLabel(m_resolver))
-                                    }
+                if (eventsToForward) {
+                    use(EventMarshalMethods) {
+                        xml.log {
+                            events {
+                                for(Event e in eventsToForward) {
+                                    e.resolveNodeLabel(m_resolver)
+                                    e.marshal(xml)
                                 }
                             }
-                            m_log.debug("finished creating event xml")
                         }
                     }
                 }
-            
             }
-        } catch (Exception e) {
-            m_log.debug("Exception occurred", e)  
         } finally {
             m_log.debug("finished sending eventList ${eventsToForward}")
         }
-    
     }
-    
-    protected void OLDforwardEvents(List eventsToForward) {
-        
-        int count = eventsToForward.size();
-        m_log.debug("openNmsHost is ${m_openNmsHost} forwarding ${eventsToForward.size()} events.")
-
-        Socket socket = null;
-        
-        try {
-        
-        socket = new Socket(m_openNmsHost, m_port);
-        socket.outputStream.withWriter { out ->
-        
-          m_log.debug("In closure forwarding events")
-          def xml = new MarkupBuilder(out);
-          xml.log {
-              events {
-                  for(NNMEvent e in eventsToForward) {
-                      m_log.debug("Forwarding event: ${e.name}")
-                      event {
-                          uei("uei.opennms.org/external/nnm/${e.name}")
-                          source("opennmsd")
-                          time(m_dateFormat.format(e.timeStamp))
-                          host(m_host)
-                          'interface'(e.agentAddress)
-                          snmphost(e.snmpHost)
-                          snmp {
-                              id(e.enterpriseId)
-                              generic(e.generic)
-                              specific(e.specific)
-                              version(e.version)
-                              community(e.community)
-                              //'time-stamp'(m_dateFormat.format(e.timeStamp))
-                          }
-                          List varBinds = e.varBinds;
-                          parms {
-                              for(NNMVarBind v in varBinds) {   
-                                  m_log.debug("adding varbind")
-                                  m_log.debug("varbind ${v.objectId}=${v.value}")
-                                  parm {
-                                      parmName(v.objectId)
-                                      value(v.value)
-                                  }                              
-                                }
-                                parm {
-                                    parmName("nnmEventOid")
-                                    value(e.eventObjectId)
-                                }
-                                parm {
-                                    parmName("nodelabel")
-                                    value(e.resolveNodeLabel(m_resolver))
-                                }
-                             }
-                      }
-                      m_log.debug("finished creating event xml")
-                  }
-              }
-          }
-        }  
-      } catch (Exception e) {
-          m_log.debug("Exception occurred", e)  
-      }finally {
-          m_log.debug("finished sending eventList ${eventsToForward}")
-          try { if (socket != null) socket.close(); } catch (IOException e) { m_log.info("Failed to close the socket to opennms.") }
-      }
-    }
-
 }

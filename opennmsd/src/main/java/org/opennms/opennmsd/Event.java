@@ -29,10 +29,15 @@
  */
 package org.opennms.opennmsd;
 
-import org.opennms.nnm.swig.OVsnmpPdu;
+import java.util.Date;
 
-public interface NNMEventFactory {
-    
-    NNMEvent createEvent(OVsnmpPdu event);
+public interface Event {
 
+    public String getUei();
+    public Date getTimeStamp();
+
+    public boolean isPreserved();
+    public void setPreserved(boolean preserved);
+
+    public String resolveNodeLabel(Resolver r);
 }

@@ -8,6 +8,8 @@
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
+ * Original code base Copyright (C) 1999-2001 Oculan Corp.  All rights reserved.
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -27,54 +29,69 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  */
-
 package org.opennms.opennmsd;
 
+import java.util.Date;
 
-public class DefaultNNMVarBind implements NNMVarBind {
+/**
+ * An event used to represent the Status of opennmsd
+ *
+ * @author brozow
+ */
+public class StatusEvent implements Event {
+
+    public static StatusEvent createStartEvent() {
+	return new StatusEvent("uei.opennms.org/external/nnm/opennmsdStart");
+    }
+
+    public static StatusEvent createStopEvent() {
+	return new StatusEvent("uei.opennms.org/external/nnm/opennmsdStop");
+    }
+
+    public static StatusEvent createSyncLostEvent() {
+	StatusEvent e = new StatusEvent("uei.opennms.org/external/nnm/opennmsdSyncLost");
+	e.setPreserved(true);
+	return e;
+    }
+
+  
     
-    private String m_encoding;
-    private String m_type;
-    private String m_objectId;
-    private String m_value;
-
-    public DefaultNNMVarBind(String oid, String type, String value) {
-        setEncoding("text");
-        setObjectId(oid);
-        setType(type);
-        setValue(value);
+    private String m_uei;
+    private Date m_timeStamp;
+    private boolean m_preserved;
+    
+    public StatusEvent(String uei) {
+	this(uei, new Date());
     }
 
-    public String getEncoding() {
-        return m_encoding;
+    public StatusEvent(String uei, Date timeStamp) {
+	m_uei = uei;
+        m_timeStamp = timeStamp;
+    }
+    
+    public String getUei() {
+        return m_uei;
+    }
+    
+    public Date getTimeStamp() {
+        return m_timeStamp;
     }
 
-    public void setEncoding(String encoding) {
-        m_encoding = encoding;
+    public void setTimeStamp(Date timestamp) {
+        m_timeStamp = timestamp;
     }
 
-    public String getObjectId() {
-        return m_objectId;
+    public boolean isPreserved() {
+        return m_preserved;
+    }
+    
+    public void setPreserved(boolean preserved) {
+        m_preserved = preserved;
     }
 
-    public void setObjectId(String objectId) {
-        m_objectId = objectId;
-    }
-
-    public String getValue() {
-        return m_value;
-    }
-
-    public void setValue(String value) {
-        m_value = value;
-    }
-
-    public String getType() {
-        return m_type;
-    }
-
-    public void setType(String type) {
-        m_type = type;
+    public String resolveNodeLabel(Resolver r) {
+	// this has no nodeLabel
+	return null;
     }
 
 }
