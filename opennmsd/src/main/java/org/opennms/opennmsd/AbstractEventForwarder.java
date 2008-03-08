@@ -84,23 +84,23 @@ public abstract class AbstractEventForwarder implements EventForwarder, Runnable
     
     
     /* (non-Javadoc)
-     * @see org.opennms.opennmsd.EventForwarder#accept(org.opennms.opennmsd.NNMEvent)
+     * @see org.opennms.opennmsd.EventForwarder#accept(org.opennms.opennmsd.Event)
      */
-    public void accept(NNMEvent event) {
+    public void accept(Event event) {
         m_queue.accept(event);
     }
 
     /* (non-Javadoc)
-     * @see org.opennms.opennmsd.EventForwarder#discard(org.opennms.opennmsd.NNMEvent)
+     * @see org.opennms.opennmsd.EventForwarder#discard(org.opennms.opennmsd.Event)
      */
-    public void discard(NNMEvent event) {
+    public void discard(Event event) {
         m_queue.discard(event);
     }
 
     /* (non-Javadoc)
-     * @see org.opennms.opennmsd.EventForwarder#preserve(org.opennms.opennmsd.NNMEvent)
+     * @see org.opennms.opennmsd.EventForwarder#preserve(org.opennms.opennmsd.Event)
      */
-    public void preserve(NNMEvent event) {
+    public void preserve(Event event) {
         m_queue.preserve(event);
     }
 

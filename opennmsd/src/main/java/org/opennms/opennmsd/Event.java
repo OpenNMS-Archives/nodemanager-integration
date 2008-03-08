@@ -29,17 +29,15 @@
  */
 package org.opennms.opennmsd;
 
-public interface EventForwarder {
-    
-    public void start();
-    
-    public void preserve(Event event);
-    
-    public void accept(Event event);
-    
-    public void discard(Event event);
-    
-    public void stop();
-    
+import java.util.Date;
 
+public interface Event {
+
+    public String getUei();
+    public Date getTimeStamp();
+
+    public boolean isPreserved();
+    public void setPreserved(boolean preserved);
+
+    public String resolveNodeLabel(Resolver r);
 }

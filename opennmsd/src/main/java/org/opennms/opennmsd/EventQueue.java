@@ -119,10 +119,11 @@ public class EventQueue {
         abstract void forwardSuccessful(List events);
         abstract void forwardFailed(List events);
 
-        protected void addToPreservedQueue(NNMEvent e) {
+        protected void addToPreservedQueue(Event e) {
             if (m_preservedQueue.size() >= m_maxPreservedEvents) {
                 m_nextBatch.clear();
                 m_preservedQueue.clear();
+		m_preservedQueue.offer(StatusEvent.createSyncLostEvent());
             }
             m_preservedQueue.offer(e);
         }
@@ -136,7 +137,7 @@ public class EventQueue {
 
         protected void addPreservedToPreservedQueue(List events) {
             for(Iterator it = events.iterator(); it.hasNext(); ) {
-                NNMEvent e = (NNMEvent)it.next();
+                Event e = (Event)it.next();
                 if (e.isPreserved()) {
                     addToPreservedQueue(e);
                 }
@@ -154,7 +155,7 @@ public class EventQueue {
         public List getEventsToForward() throws InterruptedException {
             List events = new ArrayList(m_maxBatchSize);
             
-            NNMEvent e = (NNMEvent) m_queue.take();
+            Event e = (Event) m_queue.take();
             events.add(e);
             
             m_queue.drainTo(events, m_maxBatchSize - events.size());
@@ -273,15 +274,15 @@ public class EventQueue {
        m_nextBatch = new ArrayList(m_maxBatchSize); 
     }
 
-    public void discard(NNMEvent e) {
+    public void discard(Event e) {
         // do nothing
     }
     
-    public void accept(NNMEvent e) {
+    public void accept(Event e) {
         m_queue.offer(e);
     }
     
-    public void preserve(NNMEvent e) {
+    public void preserve(Event e) {
         e.setPreserved(true);
         m_queue.offer(e);
     }

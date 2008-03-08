@@ -36,7 +36,7 @@ import java.util.List;
 
 import org.opennms.nnm.SnmpObjId;
 
-public class NNMEvent {
+public class NNMEvent implements Event {
 
     // fields populated directly from the trap
     private EventIdentity m_eventIdentity;
@@ -77,6 +77,10 @@ public class NNMEvent {
         
         m_varBinds.add(varBind);
         
+    }
+
+    public String getUei() {
+	return "uei.opennms.org/external/nnm/"+getName();
     }
     
     public void setEventIdentity(EventIdentity id) {
