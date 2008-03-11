@@ -8,7 +8,9 @@
 #include <sys/time.h>
 
 #include <sys/socket.h>
+#ifndef __hppa__
 #include <sys/select.h>
+#endif
 
 #include <netinet/in.h>
 #include <arpa/inet.h>

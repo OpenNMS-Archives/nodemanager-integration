@@ -21,7 +21,14 @@ ifeq ($(OS), SunOS)
 	LIBFLAGS := $(LIBFLAGS) $(foreach dir, $(LIBDIRS), -R$(dir))
 endif
 
+
 LIBS       = $(LIBFLAGS) -lovsnmp
+
+
+ifneq (,$(findstring PA_RISC,$(ARCH)))
+	LIBS += -lstream
+endif
+
 INCLUDES   = -I$(OVINC)
 
 JSRCDIR    = target/generated-sources/swig
@@ -63,7 +70,7 @@ JAVALDSHARED = $(LDSHARED)
 #JAVACXXSHARED = $(CXXSHARED) -shared
 
 ifeq ($(OS), HP-UX)
-	JAVACXXSHARED = g++ -shared
+	JAVACXXSHARED = g++ -v -shared -fPIC
 else
 	JAVACXXSHARED = g++ -Wl,-G
 endif
@@ -80,15 +87,12 @@ OBJS      = $(SRCS:.c=.o) $(CXXSRCS:.cxx=.o)
 # compilers.   If it doesn't work,  comment it out.
 CXXSHARED= g++ -Wl,-G
 
-
-
-
 all:: java_cpp
 
 java_cpp: $(SRCS)
 	mkdir -p $(JSRCDIR)/$(PKGDIR)
 	$(SWIG) -java -c++ -outdir $(JSRCDIR)/$(PKGDIR) -package $(PACKAGE) $(SWIGOPT) $(INTERFACE) 
-	$(CXX) -c $(CCSHARED) $(CFLAGS) $(JAVACFLAGS) $(SRCS) $(CXXSRCS) $(ICXXSRCS) $(INCLUDES) $(JAVA_INCLUDE)
+	$(CXX) -fPIC -c $(CCSHARED) $(CFLAGS) $(JAVACFLAGS) $(SRCS) $(CXXSRCS) $(ICXXSRCS) $(INCLUDES) $(JAVA_INCLUDE)
 	$(JAVACXXSHARED) $(OBJS) $(IOBJS) $(JAVA_DLNK) $(LIBS) $(CPP_DLLIBS) -o $(JAVA_LIBPREFIX)$(TARGET)$(JAVASO)
 
 mvn-package:: java_cpp

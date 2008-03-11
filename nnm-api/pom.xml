@@ -51,6 +51,7 @@
 	      <executable>${make}</executable>
 	      <arguments>
                 <argument>OS=${os.name}</argument>
+                <argument>ARCH=${os.arch}</argument>
                 <argument>JDK_HOME=${jdk.home}</argument>
                 <argument>java_cpp</argument>
 	      </arguments>
