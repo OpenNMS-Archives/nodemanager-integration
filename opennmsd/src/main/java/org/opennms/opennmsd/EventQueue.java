@@ -221,6 +221,7 @@ public class EventQueue {
         }
 
         public void forwardSuccessful(List events) {
+            m_nextBatch.clear();
             if (m_preservedQueue.isEmpty()) {
                 setState(FORWARDING);
             }
