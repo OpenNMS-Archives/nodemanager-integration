@@ -123,7 +123,7 @@ public class EventQueue {
             if (m_preservedQueue.size() >= m_maxPreservedEvents) {
                 m_nextBatch.clear();
                 m_preservedQueue.clear();
-		m_preservedQueue.offer(StatusEvent.createSyncLostEvent());
+                m_preservedQueue.offer(StatusEvent.createSyncLostEvent());
             }
             m_preservedQueue.offer(e);
         }
@@ -221,6 +221,7 @@ public class EventQueue {
         }
 
         public void forwardSuccessful(List events) {
+            m_nextBatch.clear();
             if (m_preservedQueue.isEmpty()) {
                 setState(FORWARDING);
             }
