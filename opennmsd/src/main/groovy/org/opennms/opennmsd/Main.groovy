@@ -30,6 +30,7 @@
 package org.opennms.opennmsd;
 
 import org.apache.log4j.Logger;
+import org.opennms.nnm.swig.NNM;
 
 public class Main {
     
@@ -46,6 +47,10 @@ public class Main {
             if (args.length < 2) {
                 throw new IllegalArgumentException("Configuration files must be specified");
             }
+
+	    int nnmApiLogLevel = Integer.getInteger("nnm.api.logLevel", NNM.LOG_WRN).intValue();
+
+	    NNM.setLogLevel(nnmApiLogLevel);
             
             OpenNMSDaemon daemon = new OpenNMSDaemon();
             

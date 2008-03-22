@@ -1,6 +1,7 @@
 package org.opennms.ovapi;
 
 import org.apache.log4j.Logger;
+import org.opennms.nnm.SnmpCallbackTemplate;
 import org.opennms.nnm.swig.OVsnmpPdu;
 import org.opennms.nnm.swig.OVsnmpSession;
 import org.opennms.nnm.swig.SnmpCallback;
@@ -15,9 +16,9 @@ public abstract class TrapProcessingDaemon extends OVsDaemon {
     
     protected String onInit() {
         
-        m_callback = new SnmpCallback() {
+        m_callback = new SnmpCallbackTemplate() {
 
-            public void callback(int reason, OVsnmpSession session, OVsnmpPdu pdu) {
+            public void callbackInternal(int reason, OVsnmpSession session, OVsnmpPdu pdu) {
                 Logger.getLogger(getClass()).debug("callback called");
                 try {
                     onEvent(reason, session, pdu);

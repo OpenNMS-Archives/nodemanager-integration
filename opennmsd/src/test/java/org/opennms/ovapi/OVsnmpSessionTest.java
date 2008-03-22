@@ -39,6 +39,7 @@ import junit.framework.TestCase;
 
 import org.opennms.mock.snmp.MockSnmpAgent;
 import org.opennms.nnm.SnmpObjId;
+import org.opennms.nnm.SnmpCallbackTemplate;
 import org.opennms.nnm.swig.NNM;
 import org.opennms.nnm.swig.OVsnmpPdu;
 import org.opennms.nnm.swig.OVsnmpSession;
@@ -87,7 +88,7 @@ public class OVsnmpSessionTest extends TestCase {
         SnmpObjId sysName = SnmpObjId.get(".1.3.6.1.2.1.1.5.0");
         
         
-        OVsnmpPdu request = OVsnmpPdu.create(NNM.GET_REQ_MSG);
+        OVsnmpPdu request = new OVsnmpPdu(NNM.GET_REQ_MSG);
         
         assertNull(request.getVarBinds());
         
@@ -100,14 +101,14 @@ public class OVsnmpSessionTest extends TestCase {
         
         assertNull(varBind.getNextVarBind());
         
-        request.free();
+        request.delete();
     }
     
     public void testBlockingSend() {
         SnmpObjId sysName = SnmpObjId.get(".1.3.6.1.2.1.1.5.0");
         
         
-        OVsnmpPdu request = OVsnmpPdu.create(NNM.GET_REQ_MSG);
+        OVsnmpPdu request = new OVsnmpPdu(NNM.GET_REQ_MSG);
         request.addNullVarBind(sysName.getIds());
         
         OVsnmpSession session = open(m_host, 9161);
@@ -129,14 +130,14 @@ public class OVsnmpSessionTest extends TestCase {
         
         assertEquals("brozow.local", new String(octets));
         
-        reply.free();
+        reply.delete();
         
         close(session);
         
     }
     
     
-    private static class Walker extends SnmpCallback {
+    private static class Walker extends SnmpCallbackTemplate {
         
         boolean m_finished = false;
         String m_peername;
@@ -157,27 +158,20 @@ public class OVsnmpSessionTest extends TestCase {
             sendNext(m_base);
         }
         
-        public void callback(int reason, OVsnmpSession session, OVsnmpPdu reply) {
-            try {
-                if (reason == NNM.SNMP_ERR_NO_RESPONSE) {
-                    System.err.println("NO_RESPONSE");
-                    timedOut();
-                    return;
-                }
-
-                SnmpObjId recvdOid = processVarBinds(reply.getVarBinds());
-
-                if (m_base.isPrefixOf(recvdOid)) {
-                    sendNext(recvdOid);
-                } else {
-                    finished();
-                }
-            
-            } finally {
-                if (reply != null) {
-                    reply.free();
-                }
-            }
+        public void callbackInternal(int reason, OVsnmpSession session, OVsnmpPdu reply) {
+	    if (reason == NNM.SNMP_ERR_NO_RESPONSE) {
+		System.err.println("NO_RESPONSE");
+		timedOut();
+		return;
+	    }
+	    
+	    SnmpObjId recvdOid = processVarBinds(reply.getVarBinds());
+	    
+	    if (m_base.isPrefixOf(recvdOid)) {
+		sendNext(recvdOid);
+	    } else {
+		finished();
+	    }
             
         }
         
@@ -270,7 +264,7 @@ public class OVsnmpSessionTest extends TestCase {
         
         private void sendNext(SnmpObjId oid) {
             
-            OVsnmpPdu next = OVsnmpPdu.create(NNM.GETNEXT_REQ_MSG);
+            OVsnmpPdu next = new OVsnmpPdu(NNM.GETNEXT_REQ_MSG);
             
             next.addNullVarBind(oid.getIds());
             

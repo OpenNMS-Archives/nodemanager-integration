@@ -37,12 +37,12 @@ import org.opennms.ovapi.TrapProcessingDaemon;
 public class OpenNMSDaemon extends TrapProcessingDaemon implements ProcessManagementListener, NNMEventListener {
     
     private static Logger log = Logger.getLogger(OpenNMSDaemon.class);
-	
-	private Configuration m_configuration;
-	private EventForwarder m_eventForwarder;
-	private NNMEventFactory m_eventFactory;
-
-	
+    
+    private Configuration m_configuration;
+    private EventForwarder m_eventForwarder;
+    private NNMEventFactory m_eventFactory;
+    
+        
     public void setConfiguration(Configuration configuration) {
         m_configuration = configuration;
     }
@@ -55,49 +55,49 @@ public class OpenNMSDaemon extends TrapProcessingDaemon implements ProcessManage
         m_eventFactory = eventFactory;
     }
 
-	public String onInit() {
-		Assert.notNull(m_configuration, "the configuration property must not be null");
-		Assert.notNull(m_eventForwarder, "the eventForwarder property must not be null");
-		
-		super.onInit();
-		
-		sendStartEvent();
-		
-		return "Initialization complete.";
-	}
-
-	private void sendStartEvent() {
-	    m_eventForwarder.start();
+    public String onInit() {
+        Assert.notNull(m_configuration, "the configuration property must not be null");
+        Assert.notNull(m_eventForwarder, "the eventForwarder property must not be null");
+        
+        super.onInit();
+        
+        sendStartEvent();
+        
+        return "Initialization complete.";
     }
-
+    
+    private void sendStartEvent() {
+        m_eventForwarder.start();
+    }
+    
     public String onStop() {
-	    
-	    m_eventForwarder.stop();
-	    
-	    super.onStop();
-	    
-	    return "opennms stopped successfully.";
-		
-	}
-
-	public void onEvent(NNMEvent event) {
-	    FilterChain chain = m_configuration.getFilterChain();
-	    
-	    	    
-	    String action = chain.filterEvent(event);
-	    
-	    log.debug("received an event to be filtered "+event+" action is "+action);
-	    
-	    if (Filter.PRESERVE.equals(action)) {
-	        m_eventForwarder.preserve(event);
-	    } else if (Filter.ACCEPT.equals(action)) {
+        
+        m_eventForwarder.stop();
+        
+        super.onStop();
+        
+        return "opennms stopped successfully.";
+        
+    }
+    
+    public void onEvent(NNMEvent event) {
+        FilterChain chain = m_configuration.getFilterChain();
+        
+        
+        String action = chain.filterEvent(event);
+        
+        log.debug("received an event to be filtered "+event+" action is "+action);
+        
+        if (Filter.PRESERVE.equals(action)) {
+            m_eventForwarder.preserve(event);
+        } else if (Filter.ACCEPT.equals(action)) {
             m_eventForwarder.accept(event);
-	    } else {
-	        m_eventForwarder.discard(event);
-	    }
-		
-	}
-
+        } else {
+            m_eventForwarder.discard(event);
+        }
+        
+    }
+    
     protected void onEvent(int reason, OVsnmpSession session, OVsnmpPdu pdu) {
         
         try {
@@ -108,11 +108,11 @@ public class OpenNMSDaemon extends TrapProcessingDaemon implements ProcessManage
         } catch (Exception e) {
             log.debug("Exception processing pdu: "+pdu, e);
         } finally {
-            pdu.free();
+            pdu.delete();
         }
-
-
+        
+        
     }
-
- 
+    
+    
 }
