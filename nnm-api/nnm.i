@@ -2,6 +2,8 @@
 %module(directors=1) NNM
 %include "typemaps.i"
 
+%typemap(javadirectorin) SWIGTYPE *, SWIGTYPE (CLASS::*), SWIGTYPE &, const SWIGTYPE & "(($jniinput == 0) ? null : new $javaclassname($jniinput, false))"
+
 %{
 
 #include <sys/types.h>
@@ -540,6 +542,9 @@ typedef struct SNMPPdu {
 %{
 
   static void callback_function(int reason, OVsnmpSession* session, OVsnmpPdu* pdu, void *callback_data) {
+   
+    TRACE("ENTER:callback_function(%d, %p, %p, %p)", reason, session, pdu, callback_data);
+
     bool shouldFree = true;
     if (callback_data != NULL) {
 
@@ -550,8 +555,11 @@ typedef struct SNMPPdu {
     }
 
     if (pdu && shouldFree) {
+      TRACE("EXIT: freeing pdu at %p", pdu);
       OVsnmpFreePdu(pdu);
     }
+
+    TRACE("EXIT:callback_function(%d, %p, %p, %p)", reason, session, pdu, callback_data);
   }
 
 %}
@@ -604,6 +612,26 @@ typedef struct SNMPSession {
 
     static OVsnmpSession* eventOpen(const char* applName, SnmpCallback* cb, const char* filter) {
       return OVsnmpEventOpen(NULL, applName, cb, filter);
+    }
+
+    int getFlags() {
+      NOTNULL(self, "OVsnmpSession::getFlags()");
+      return self->session_flags;
+    }
+
+    int isFlagSet(int mask) {
+      NOTNULL(self, "OVsnmpSession::isFlagSet()");
+      return OVSNMP_TEST_FLAG(mask, self->session_flags);
+    }
+
+    void clearFlag(int mask) {
+      NOTNULL(self, "OVsnmpSession::clearFlag()");
+      OVSNMP_CLEAR_FLAG(mask, self->session_flags);
+    }
+
+    void setFlag(int mask) {
+      NOTNULL(self, "OVsnmpSession::setFlag()");
+      OVSNMP_SET_FLAG(mask, self->session_flags);
     }
 
     int close() {

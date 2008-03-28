@@ -3,9 +3,11 @@ package org.opennms.ovapi;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.apache.tools.ant.util.Base64Converter;
 import org.opennms.nnm.swig.NNM;
 import org.opennms.nnm.swig.OVsnmpPdu;
 import org.opennms.nnm.swig.OVsnmpVarBind;
+import org.opennms.opennmsd.DefaultNNMVarBind;
 
 
 public abstract class OVsnmpPduUtils {
@@ -42,10 +44,6 @@ public abstract class OVsnmpPduUtils {
         public String toString() {
             return buf.toString();
         }
-        
-        
-        
-        
         
     }
     
@@ -133,6 +131,64 @@ public abstract class OVsnmpPduUtils {
         } else {
             return "Opaque";
         }
+    }
+    
+    public static boolean allBytesDisplayable(byte[] bytes) {
+        for(int i = 0; i < bytes.length; i++) {
+            byte b = bytes[i];
+            if ((b < 32 && b != 9 && b != 10 && b != 13 && b != 0) || b == 127)
+                return false;
+        }
+        return true;
+    }
+
+    public static DefaultNNMVarBind constructNNMVarBind(OVsnmpVarBind varBind) {
+        
+        String encoding = "text";
+        String val = null;
+        int type = varBind.getType();
+        if (type == NNM.ASN_BOOLEAN) {
+            val = (varBind.getValue().getIntValue() == 0 ? "false" : "true");
+        } else if (type == NNM.ASN_INTEGER) {
+            val = Integer.toString(varBind.getValue().getIntValue());
+        } else if (type == NNM.ASN_OCTET_STR) {
+            byte[] bytes = new byte[varBind.getValLength()];
+            varBind.getValue().getOctetString(bytes);
+            if (allBytesDisplayable(bytes)) {
+                val = new String(bytes);
+            } else {
+                encoding = "base64";
+                Base64Converter b64 = new Base64Converter();
+                val = b64.encode(bytes);
+            }
+        } else if (type == NNM.ASN_U_INTEGER) {
+            val = ""+varBind.getValue().getUnsigned32Value();
+        } else if (type == NNM.ASN_OBJECT_ID) {
+            val =  varBind.getValue().getObjectId(varBind.getValLength());
+        } else if (type == NNM.ASN_TIMETICKS) {
+            int centis = varBind.getValue().getIntValue();
+            val = ""+centis/100+"."+centis%100+" s";
+        } else if (type == NNM.ASN_COUNTER32) {
+            val = ""+varBind.getValue().getUnsigned32Value();
+        } else if (type == NNM.ASN_COUNTER64) {
+            val = ""+varBind.getValue().getCounter64Value();
+        } else if (type == NNM.ASN_GAUGE) {
+            val = ""+varBind.getValue().getUnsigned32Value();
+        } else if (type == NNM.ASN_IPADDRESS) {
+            byte[] bytes = new byte[4];
+            varBind.getValue().getOctetString(bytes);
+            try {
+                val = InetAddress.getByAddress(bytes).getHostAddress();
+            } catch (UnknownHostException e) {
+                val = "UnknownHost that can't happen";
+            }
+        } else {
+            val = "UNKNOWN TYPE: "+type;
+        }
+
+        String oid = varBind.getObjectId();
+        String typeString = getTypeString(varBind.getType());
+        return new DefaultNNMVarBind(encoding, oid, typeString, val);
     }
 
 

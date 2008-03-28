@@ -62,9 +62,7 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
         
         for(OVsnmpVarBind varBind = trap.getVarBinds(); varBind != null; varBind = varBind.getNextVarBind()) 
         {
-            e.addVarBind(varBind.getObjectId(), 
-                    OVsnmpPduUtils.getTypeString(varBind.getType()),
-                    OVsnmpPduUtils.getVarbindValue(varBind));
+            e.addVarBind(OVsnmpPduUtils.constructNNMVarBind(varBind));
      
             
         }
