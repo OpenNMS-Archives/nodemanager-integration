@@ -30,6 +30,7 @@
 package org.opennms.opennmsd;
 
 import org.apache.log4j.Logger;
+import org.opennms.nnm.swig.NNM;
 import org.opennms.nnm.swig.OVsnmpPdu;
 import org.opennms.nnm.swig.OVsnmpSession;
 import org.opennms.ovapi.TrapProcessingDaemon;
@@ -101,14 +102,22 @@ public class OpenNMSDaemon extends TrapProcessingDaemon implements ProcessManage
     protected void onEvent(int reason, OVsnmpSession session, OVsnmpPdu pdu) {
         
         try {
-            NNMEvent event = m_eventFactory.createEvent(pdu);
-            if (event != null) {
-                onEvent(event);
+            if (reason == NNM.SNMP_SYSERR_LOSTCONN) {
+		log.warn("Lost connection to trapd!");
+	    }
+            else if (pdu == null) {
+		log.warn("PDU is NULL!!!");
             }
+            else {
+                NNMEvent event = m_eventFactory.createEvent(pdu);
+	        if (event != null) {
+	            onEvent(event);
+	        }
+	    }
         } catch (Exception e) {
             log.debug("Exception processing pdu: "+pdu, e);
         } finally {
-            pdu.delete();
+	    if (pdu != null) pdu.delete();
         }
         
         

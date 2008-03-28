@@ -66,11 +66,7 @@ public class NNMEvent implements Event {
         m_eventIdentity = identity;
     }
 
-    public void addVarBind(String objectId, String type, String varbind) {
-        addVarBind(new DefaultNNMVarBind(objectId, type, varbind));
-    }
-
-    protected void addVarBind(NNMVarBind varBind) {
+    public void addVarBind(NNMVarBind varBind) {
         if (m_varBinds == null) {
             m_varBinds = new LinkedList();
         }
