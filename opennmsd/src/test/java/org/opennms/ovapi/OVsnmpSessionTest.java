@@ -38,13 +38,12 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.opennms.mock.snmp.MockSnmpAgent;
-import org.opennms.nnm.SnmpObjId;
 import org.opennms.nnm.SnmpCallbackTemplate;
+import org.opennms.nnm.SnmpObjId;
 import org.opennms.nnm.swig.NNM;
 import org.opennms.nnm.swig.OVsnmpPdu;
 import org.opennms.nnm.swig.OVsnmpSession;
 import org.opennms.nnm.swig.OVsnmpVarBind;
-import org.opennms.nnm.swig.SnmpCallback;
 import org.opennms.nnm.swig.fd_set;
 import org.opennms.nnm.swig.timeval;
 import org.springframework.core.io.ClassPathResource;

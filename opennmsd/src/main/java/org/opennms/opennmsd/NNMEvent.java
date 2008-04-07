@@ -196,7 +196,7 @@ public class NNMEvent implements Event {
             ", address="+getAgentAddress()+
             ", category="+getCategory()+
             ", severity="+getSeverity()+
-            ", oid="+getEventObjectId()+
+            ", identity="+getEventIdentity()+
             "]";
     }
 

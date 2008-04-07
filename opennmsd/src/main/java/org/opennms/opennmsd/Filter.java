@@ -91,6 +91,10 @@ public class Filter {
     }
 
     private boolean addressMatches(String agentAddress) {
+        if (agentAddress == null) {
+            // if the event has no address then don't match it
+            return false;
+        }
         if (m_addressMatchSpec == null) {
             return true;
         }
@@ -98,6 +102,10 @@ public class Filter {
     }
 
     private boolean eventNameMatches(String name) {
+        if (name == null) {
+            // if the event has no name then don't match it
+            return false;
+        }
         if (m_eventNameMatcher == null) { {
             
         }
@@ -107,6 +115,10 @@ public class Filter {
     }
 
     private boolean severityMatches(String severity) {
+        if (severity == null) {
+            // if the event has no severity then don't match it
+            return false;
+        }
         if (m_severityMatcher == null) {
             return true;
         }
@@ -114,6 +126,10 @@ public class Filter {
     }
 
     private boolean categoryMatches(String category) {
+        if (category == null) {
+            // if the event has not category then don't match it
+            return false;
+        }
         if (m_categoryMatcher == null) {
             return true;
         }

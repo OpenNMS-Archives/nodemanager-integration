@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import org.apache.tools.ant.util.Base64Converter;
 import org.opennms.nnm.swig.NNM;
 import org.opennms.nnm.swig.OVsnmpPdu;
+import org.opennms.nnm.swig.OVsnmpVal;
 import org.opennms.nnm.swig.OVsnmpVarBind;
 import org.opennms.opennmsd.DefaultNNMVarBind;
 
@@ -72,30 +73,35 @@ public abstract class OVsnmpPduUtils {
     
     public static String getVarbindValue(OVsnmpVarBind varBind) {
         int type = varBind.getType();
-        if (type == NNM.ASN_BOOLEAN) {
-            return (varBind.getValue().getIntValue() == 0 ? "false" : "true");
+        OVsnmpVal value = varBind.getValue();
+        if (type == NNM.ASN_NULL) {
+            return "Null";
+        } else if (value == null || value.isNullValue()) {
+            return "NullValue of type "+type;
+        } else if (type == NNM.ASN_BOOLEAN) {
+            return (value.getIntValue() == 0 ? "false" : "true");
         } else if (type == NNM.ASN_INTEGER) {
-            return Integer.toString(varBind.getValue().getIntValue());
+            return Integer.toString(value.getIntValue());
         } else if (type == NNM.ASN_OCTET_STR) {
             byte[] bytes = new byte[varBind.getValLength()];
-            varBind.getValue().getOctetString(bytes);
+            value.getOctetString(bytes);
             return new String(bytes);
         } else if (type == NNM.ASN_U_INTEGER) {
-            return ""+varBind.getValue().getUnsigned32Value();
+            return ""+value.getUnsigned32Value();
         } else if (type == NNM.ASN_OBJECT_ID) {
-            return varBind.getValue().getObjectId(varBind.getValLength());
+            return value.getObjectId(varBind.getValLength());
         } else if (type == NNM.ASN_TIMETICKS) {
-            int centis = varBind.getValue().getIntValue();
+            int centis = value.getIntValue();
             return ""+centis/100+"."+centis%100+" s";
         } else if (type == NNM.ASN_COUNTER32) {
-            return ""+varBind.getValue().getUnsigned32Value();
+            return ""+value.getUnsigned32Value();
         } else if (type == NNM.ASN_COUNTER64) {
-            return ""+varBind.getValue().getCounter64Value();
+            return ""+value.getCounter64Value();
         } else if (type == NNM.ASN_GAUGE) {
-            return ""+varBind.getValue().getUnsigned32Value();
+            return ""+value.getUnsigned32Value();
         } else if (type == NNM.ASN_IPADDRESS) {
             byte[] bytes = new byte[4];
-            varBind.getValue().getOctetString(bytes);
+            value.getOctetString(bytes);
             try {
                 return InetAddress.getByAddress(bytes).getHostAddress();
             } catch (UnknownHostException e) {
@@ -128,6 +134,8 @@ public abstract class OVsnmpPduUtils {
             return "Gauge32";
         } else if (type == NNM.ASN_IPADDRESS) {
             return "IpAddress";
+        } else if (type == NNM.ASN_NULL) {
+            return "Null";
         } else {
             return "Opaque";
         }
@@ -147,13 +155,18 @@ public abstract class OVsnmpPduUtils {
         String encoding = "text";
         String val = null;
         int type = varBind.getType();
-        if (type == NNM.ASN_BOOLEAN) {
-            val = (varBind.getValue().getIntValue() == 0 ? "false" : "true");
+        OVsnmpVal value = varBind.getValue();
+        if (type == NNM.ASN_NULL) {
+            val = "Null";
+        } else if (value == null || (value.isNullValue() && type != NNM.ASN_OCTET_STR)) {
+            val = "Null Value of type "+type;
+        } else if (type == NNM.ASN_BOOLEAN) {
+            val = (value.getIntValue() == 0 ? "false" : "true");
         } else if (type == NNM.ASN_INTEGER) {
-            val = Integer.toString(varBind.getValue().getIntValue());
+            val = Integer.toString(value.getIntValue());
         } else if (type == NNM.ASN_OCTET_STR) {
             byte[] bytes = new byte[varBind.getValLength()];
-            varBind.getValue().getOctetString(bytes);
+            value.getOctetString(bytes);
             if (allBytesDisplayable(bytes)) {
                 val = new String(bytes);
             } else {
@@ -162,21 +175,21 @@ public abstract class OVsnmpPduUtils {
                 val = b64.encode(bytes);
             }
         } else if (type == NNM.ASN_U_INTEGER) {
-            val = ""+varBind.getValue().getUnsigned32Value();
+            val = ""+value.getUnsigned32Value();
         } else if (type == NNM.ASN_OBJECT_ID) {
-            val =  varBind.getValue().getObjectId(varBind.getValLength());
+            val =  value.getObjectId(varBind.getValLength());
         } else if (type == NNM.ASN_TIMETICKS) {
-            int centis = varBind.getValue().getIntValue();
+            int centis = value.getIntValue();
             val = ""+centis/100+"."+centis%100+" s";
         } else if (type == NNM.ASN_COUNTER32) {
-            val = ""+varBind.getValue().getUnsigned32Value();
+            val = ""+value.getUnsigned32Value();
         } else if (type == NNM.ASN_COUNTER64) {
-            val = ""+varBind.getValue().getCounter64Value();
+            val = ""+value.getCounter64Value();
         } else if (type == NNM.ASN_GAUGE) {
-            val = ""+varBind.getValue().getUnsigned32Value();
+            val = ""+value.getUnsigned32Value();
         } else if (type == NNM.ASN_IPADDRESS) {
             byte[] bytes = new byte[4];
-            varBind.getValue().getOctetString(bytes);
+            value.getOctetString(bytes);
             try {
                 val = InetAddress.getByAddress(bytes).getHostAddress();
             } catch (UnknownHostException e) {
