@@ -30,6 +30,8 @@ public abstract class TrapProcessingDaemon extends OVsDaemon {
         
         m_trapSession = OVsnmpSession.eventOpen("opennmsd", m_callback, ".*");
 
+	Logger.getLogger(getClass()).debug("opened session.. flags = "+Integer.toHexString(m_trapSession.getFlags()));
+
         return "TrapProcessingDaemon has initialized successfully.";
     }
 

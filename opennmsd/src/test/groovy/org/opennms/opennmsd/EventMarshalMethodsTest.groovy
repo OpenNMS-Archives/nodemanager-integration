@@ -46,8 +46,8 @@ class EventMarshalMethodsTest extends GroovyTestCase {
         e.setTimeStamp(new Date(1204996817484L));
         e.setCommunity("public")
         e.setVersion(1)
-        e.addVarBind("1.3.5.7", "OctetString", "varbind1")
-        e.addVarBind("1.3.5.8", "OctetString", "varbind2")
+        e.addVarBind(new DefaultNNMVarBind("text", "1.3.5.7", "OctetString", "varbind1"))
+        e.addVarBind(new DefaultNNMVarBind("text", "1.3.5.8", "OctetString", "varbind2"))
         e.setNodeLabel("node")
         e.setName("testEvent")
         
@@ -71,19 +71,19 @@ class EventMarshalMethodsTest extends GroovyTestCase {
   <parms>
     <parm>
       <parmName>1.3.5.7</parmName>
-      <value>varbind1</value>
+      <value encoding='text'>varbind1</value>
     </parm>
     <parm>
       <parmName>1.3.5.8</parmName>
-      <value>varbind2</value>
+      <value encoding='text'>varbind2</value>
     </parm>
     <parm>
       <parmName>nnmEventOid</parmName>
-      <value>.1.2.3.4.0.5</value>
+      <value encoding='text'>.1.2.3.4.0.5</value>
     </parm>
     <parm>
       <parmName>nodelabel</parmName>
-      <value>node</value>
+      <value encoding='text'>node</value>
     </parm>
   </parms>
 </event>"""

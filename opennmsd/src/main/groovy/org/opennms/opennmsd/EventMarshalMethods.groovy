@@ -73,19 +73,19 @@ abstract class EventMarshalMethods {
              parms {
                  for(NNMVarBind v in varBinds) {   
                      s_log.debug("adding varbind")
-                     s_log.debug("varbind ${v.objectId}=${v.value}")
+                     s_log.debug("varbind ${v.objectId}=${v.encoding}(${v.value})")
                      parm {
                          parmName(v.objectId)
-                         value(v.value)
+                         value(encoding:v.encoding, v.value)
                      }                              
                  }
                  parm {
                      parmName("nnmEventOid")
-                     value(e.eventObjectId)
+                     value(encoding:'text', e.eventObjectId)
                  }
                  parm {
                      parmName("nodelabel")
-                     value(e.nodeLabel)
+                     value(encoding:'text', e.nodeLabel)
                  }
              }
          }

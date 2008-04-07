@@ -51,8 +51,12 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
     
     public NNMEvent createEvent(OVsnmpPdu trap) {
         
+        log.debug("creating event for trap "+trap);
+        
         // add trap information to event
         NNMEvent e = new NNMEvent(trap.getEnterpriseObjectId(), trap.getGenericType(), trap.getSpecificType());
+        
+        log.debug("processing trap identifiers for trap "+trap);
         
         e.setAgentAddress(trap.getAgentAddress());
         e.setSnmpHost(trap.getIpAddress());
@@ -60,18 +64,21 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
         e.setCommunity(trap.getCommunity());
         e.setVersion(1);
         
+        log.debug("processing varbinds for trap "+trap+ " trap identity is "+e.getEventIdentity());
+
+        int varBindCount = 0;
         for(OVsnmpVarBind varBind = trap.getVarBinds(); varBind != null; varBind = varBind.getNextVarBind()) 
         {
-            e.addVarBind(varBind.getObjectId(), 
-                    OVsnmpPduUtils.getTypeString(varBind.getType()),
-                    OVsnmpPduUtils.getVarbindValue(varBind));
-     
+            log.debug("processing varbind "+(++varBindCount));
             
+            e.addVarBind(OVsnmpPduUtils.constructNNMVarBind(varBind));
+
         }
 
         // fix up event fields for nnm-internal events
         String newAddr = e.getVarBindValue(".1.3.6.1.4.1.11.2.17.2.2.0");
         if (newAddr != null) {
+            log.debug("fixing up varbinds for nnm-internal events");
             try {
                 InetAddress addr = InetAddress.getByName(newAddr);
                 String iface = addr.getHostAddress();
@@ -85,9 +92,17 @@ public class DefaultNNMEventFactory implements NNMEventFactory {
             }
         }
 
+        log.debug("Loading trapd.conf info for trap "+e.getEventIdentity());
         // add formatting information to event
         EventFormat format = m_eventConfiguration.getFormat(e);
+        
+        if (format == null) {
+            log.error("No trapd.conf information found for event "+e.getEventIdentity()+"  The event will be ignored");
+            return null;
+        } 
+        
         format.apply(e);
+        log.debug("Finished loading trapd.conf info for "+e.getEventIdentity());
 
         return e;
     }

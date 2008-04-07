@@ -38,8 +38,8 @@ public class DefaultNNMVarBind implements NNMVarBind {
     private String m_objectId;
     private String m_value;
 
-    public DefaultNNMVarBind(String oid, String type, String value) {
-        setEncoding("text");
+    public DefaultNNMVarBind(String encoding, String oid, String type, String value) {
+        setEncoding(encoding);
         setObjectId(oid);
         setType(type);
         setValue(value);
