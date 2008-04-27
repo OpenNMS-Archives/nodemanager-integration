@@ -100,11 +100,20 @@ class EventMarshalMethodsTest extends GroovyTestCase {
   <source>opennmsd</source>
   <time>Saturday, March 8, 2008 5:20:17 PM GMT</time>
   <host>${m_host}</host>
+  <interface>192.168.1.1</interface>
+  <parms>
+    <parm>
+      <parmName>nodelabel</parmName>
+      <value encoding='text'>node</value>
+    </parm>
+  </parms>
 </event>"""
 
         StatusEvent e = new StatusEvent("uei.opennms.org/external/nnm/opennmsdStop");
         // this time corresponds to the date above
         e.setTimeStamp(new Date(1204996817484L))
+        e.setAgentAddress("192.168.1.1")
+        e.setNodeLabel("node")
         
         String actualXml = marshalIt(e);
         

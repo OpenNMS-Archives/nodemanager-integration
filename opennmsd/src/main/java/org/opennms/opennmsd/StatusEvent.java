@@ -31,6 +31,7 @@
  */
 package org.opennms.opennmsd;
 
+import java.net.InetAddress;
 import java.util.Date;
 
 /**
@@ -41,16 +42,33 @@ import java.util.Date;
 public class StatusEvent implements Event {
 
     public static StatusEvent createStartEvent() {
-	return new StatusEvent("uei.opennms.org/external/nnm/opennmsdStart");
+    	StatusEvent e = new StatusEvent("uei.opennms.org/external/nnm/opennmsdStart");
+    	try {
+        	e.setAgentAddress(InetAddress.getLocalHost().getHostAddress());
+    	} catch (Exception excp) {
+    		
+    	}
+    	return e;
     }
 
     public static StatusEvent createStopEvent() {
-	return new StatusEvent("uei.opennms.org/external/nnm/opennmsdStop");
+    	StatusEvent e = new StatusEvent("uei.opennms.org/external/nnm/opennmsdStop");
+       	try {
+        	e.setAgentAddress(InetAddress.getLocalHost().getHostAddress());
+    	} catch (Exception excp) {
+    		
+    	}
+    	return e;
     }
 
     public static StatusEvent createSyncLostEvent() {
 	StatusEvent e = new StatusEvent("uei.opennms.org/external/nnm/opennmsdSyncLost");
 	e.setPreserved(true);
+   	try {
+    	e.setAgentAddress(InetAddress.getLocalHost().getHostAddress());
+	} catch (Exception excp) {
+		
+	}
 	return e;
     }
 
@@ -59,8 +77,29 @@ public class StatusEvent implements Event {
     private String m_uei;
     private Date m_timeStamp;
     private boolean m_preserved;
+    private String m_agentAddress;
+
+    // This fields caches the resolved agentAddress for using in forwarding
+    private String m_nodeLabel;
+
     
-    public StatusEvent(String uei) {
+    public String getAgentAddress() {
+		return m_agentAddress;
+	}
+
+	public void setAgentAddress(String address) {
+		m_agentAddress = address;
+	}
+
+	public String getNodeLabel() {
+		return m_nodeLabel;
+	}
+
+	public void setNodeLabel(String label) {
+		m_nodeLabel = label;
+	}
+
+	public StatusEvent(String uei) {
 	this(uei, new Date());
     }
 
@@ -90,8 +129,10 @@ public class StatusEvent implements Event {
     }
 
     public String resolveNodeLabel(Resolver r) {
-	// this has no nodeLabel
-	return null;
+        if (m_nodeLabel == null) {
+            m_nodeLabel = r.resolveAddress(getAgentAddress());
+        }
+        return m_nodeLabel;
     }
-
+ 
 }

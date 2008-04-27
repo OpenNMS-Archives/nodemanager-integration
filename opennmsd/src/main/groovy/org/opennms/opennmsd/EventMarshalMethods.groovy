@@ -98,6 +98,13 @@ abstract class EventMarshalMethods {
              source("opennmsd")
              time(formatForEvent(e.timeStamp))
              host(s_host)
+             'interface'(e.agentAddress)
+             parms {
+                 parm {
+                     parmName("nodelabel")
+                     value(encoding:'text', e.nodeLabel)
+                 }
+             }
          }
 
      }
